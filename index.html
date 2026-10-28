@@ -59,6 +59,10 @@
 
         <!-- SAĞ ÜST İŞLEM BUTONLARI -->
         <div class="flex items-center gap-2">
+            <!-- BİLDİRİM İZNİ VE MANUEL TEST BUTONU -->
+            <button onclick="manuelBildirimTesti()" class="w-8 h-8 rounded-xl bg-slate-800/90 text-rose-400 hover:text-white flex items-center justify-center text-xs border border-slate-700 active:scale-95 transition" title="Bildirim İzni ve Test Bildirimi Gönder">
+                <i class="fa-solid fa-bell"></i>
+            </button>
             <button onclick="checkDueAlerts(true)" class="w-8 h-8 rounded-xl bg-slate-800/90 text-amber-300 hover:text-white flex items-center justify-center text-xs border border-slate-700 active:scale-95 transition" title="15:30 Ödeme Kontrolü">
                 <i class="fa-regular fa-clock"></i>
             </button>
@@ -74,12 +78,8 @@
     <!-- ANA İÇERİK (5 BAĞIMSIZ SEKME) -->
     <main class="flex-1 px-3.5 pt-2.5 safe-bottom">
 
-        <!-- =================================================================== -->
         <!-- SEKME 1: GENEL BORÇ & 10 YILLIK TAKVİM & DİNAMİK 7'Lİ BAR TABLOSU -->
-        <!-- =================================================================== -->
         <section id="tab-genel" class="space-y-3.5">
-
-            <!-- AY & YIL GEZİNME BAR + "BU AYA DÖN" HIZLI BUTONU -->
             <div class="bg-card border border-slate-800 rounded-3xl p-3 flex items-center justify-between shadow-lg">
                 <button onclick="changeMonthOffset(-1)" class="w-9 h-9 rounded-2xl bg-amoled hover:bg-slate-800 text-slate-300 flex items-center justify-center active:scale-90 transition border border-slate-800">
                     <i class="fa-solid fa-chevron-left text-xs"></i>
@@ -88,7 +88,6 @@
                     <h2 id="calendarMonthTitle" class="text-sm font-black text-white tracking-wide">Ekim 2026</h2>
                     <div class="flex items-center justify-center gap-2 mt-0.5">
                         <span id="calendarMonthSub" class="text-[10px] font-bold text-emerald-400">Günümüz</span>
-                        <!-- BU AYA DÖN BUTONU -->
                         <button id="returnToCurrentMonthBtn" onclick="resetToCurrentMonth()" class="hidden text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 active:scale-95 transition hover:bg-emerald-500/30">
                             <i class="fa-solid fa-rotate-left mr-0.5"></i> Bu Aya Dön
                         </button>
@@ -99,7 +98,6 @@
                 </button>
             </div>
 
-            <!-- SEÇİLİ AYIN ÖZET KARTI -->
             <div class="bg-gradient-to-br from-slate-900 via-card to-emerald-950/30 border border-slate-800 rounded-3xl p-4 shadow-xl space-y-3">
                 <div class="flex items-center justify-between">
                     <div>
@@ -127,7 +125,6 @@
                     </div>
                 </div>
 
-                <!-- GENEL ERKEN KAPAMA VE TOPLAM VADE BORCU -->
                 <div class="grid grid-cols-2 gap-2 pt-1">
                     <div class="bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-2.5">
                         <span class="text-[10px] font-extrabold text-emerald-300 block">Bankadan Erken Kapama</span>
@@ -140,7 +137,6 @@
                 </div>
             </div>
 
-            <!-- 1 - 31 GÜNLÜK DİNAMİK TAKVİM HARİTASI (31. GÜN EŞLEME DESTEKLİ) -->
             <div class="bg-card border border-slate-800 rounded-3xl p-3.5 space-y-2">
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-extrabold text-white flex items-center gap-1.5">
@@ -152,13 +148,10 @@
                         <span class="flex items-center gap-1"><i class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></i> Ödendi</span>
                     </div>
                 </div>
-                <!-- Gün Kutucukları -->
                 <div id="calendarGrid" class="grid grid-cols-7 gap-1.5"></div>
-                <!-- Gün Detay Bilgisi -->
                 <div id="selectedDayInfo" class="hidden text-xs bg-amoled border border-slate-800 rounded-2xl p-3 text-slate-200"></div>
             </div>
 
-            <!-- 7 AYLIK GERÇEK DİNAMİK ÖLÇEKLİ BAR GRAFİĞİ -->
             <div class="bg-card border border-slate-800 rounded-3xl p-4 space-y-3">
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-extrabold text-white flex items-center gap-1.5">
@@ -170,21 +163,14 @@
                 <div id="barChartContainer" class="flex items-end justify-between gap-2 h-44 pt-6 px-1"></div>
             </div>
 
-            <!-- SEÇİLİ AYDAKİ TÜM KALEMLERİN LİSTESİ -->
             <div class="bg-card border border-slate-800 rounded-3xl p-3.5 space-y-2.5">
                 <h3 class="text-xs font-black text-white uppercase tracking-wider">Bu Ayki Tüm Kalemler</h3>
                 <div id="monthItemsList" class="space-y-2"></div>
             </div>
-
         </section>
 
-
-        <!-- =================================================================== -->
-        <!-- SEKME 2: KREDİLERİM (KREDİ VE TNA YÖNETİMİ) -->
-        <!-- =================================================================== -->
+        <!-- SEKME 2: KREDİLERİM -->
         <section id="tab-krediler" class="hidden space-y-3.5">
-
-            <!-- FİLTRE VE YENİ KREDİ BUTONU -->
             <div class="bg-card border border-slate-800 rounded-2xl p-2.5 flex items-center justify-between gap-2">
                 <div class="flex gap-1 bg-amoled p-1 rounded-xl border border-slate-800 text-[11px] font-extrabold overflow-x-auto">
                     <button onclick="setLoanFilter('all')" id="lf-all" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 text-slate-950 transition whitespace-nowrap">Tümü</button>
@@ -196,19 +182,11 @@
                     <span>Kredi / TNA Ekle</span>
                 </button>
             </div>
-
-            <!-- KREDİ KARTLARI LİSTESİ -->
             <div id="loansListContainer" class="space-y-3"></div>
-
         </section>
 
-
-        <!-- =================================================================== -->
         <!-- SEKME 3: FATURA & VERGİ -->
-        <!-- =================================================================== -->
         <section id="tab-fatura" class="hidden space-y-3.5">
-
-            <!-- İKİ ŞIK GEÇİŞ SEÇİCİ -->
             <div class="grid grid-cols-2 gap-1.5 bg-amoled p-1 rounded-2xl border border-slate-800 text-xs font-extrabold">
                 <button onclick="setBillSubTab('monthly')" id="subTabBtn-monthly" class="py-2.5 px-3 rounded-xl bg-blue-600 text-white transition flex items-center justify-center gap-2">
                     <i class="fa-solid fa-receipt"></i>
@@ -219,8 +197,6 @@
                     <span>Yıllık Vergiler</span>
                 </button>
             </div>
-
-            <!-- ALT ALAN 1: AYLIK FATURALAR -->
             <div id="subTab-monthly" class="space-y-3">
                 <div class="flex items-center justify-between px-1">
                     <p class="text-[11px] text-slate-400">Elektrik, Su, Doğalgaz, İnternet, Kira vb.</p>
@@ -230,8 +206,6 @@
                 </div>
                 <div id="monthlyBillsList" class="space-y-2"></div>
             </div>
-
-            <!-- ALT ALAN 2: YILLIK VERGİLER -->
             <div id="subTab-yearly" class="hidden space-y-3">
                 <div class="bg-card border border-slate-800 rounded-3xl p-3.5 space-y-2">
                     <h3 class="text-xs font-black text-amber-300 uppercase">Sabit Takvimli Vergi Dönemleri</h3>
@@ -239,16 +213,10 @@
                 </div>
                 <div id="yearlyTaxesList" class="space-y-2"></div>
             </div>
-
         </section>
 
-
-        <!-- =================================================================== -->
         <!-- SEKME 4: DANIŞMAN & VADELİ -->
-        <!-- =================================================================== -->
         <section id="tab-danisman" class="hidden space-y-3.5">
-
-            <!-- MAAŞ / GELİR VE KALAN NET NAKİT GÖSTERGESİ -->
             <div class="bg-gradient-to-br from-indigo-950/60 via-card to-slate-950 border border-indigo-500/30 rounded-3xl p-4 space-y-3 shadow-xl">
                 <div class="flex items-center justify-between">
                     <div>
@@ -265,7 +233,6 @@
                         <label class="text-xs text-slate-300 font-bold block mb-1">Aylık Toplam Net Gelir / Maaş (₺)</label>
                         <input type="number" id="monthlyIncomeInput" value="85000" oninput="calculateAdvisorAndBalance()" class="w-full bg-amoled border border-indigo-500/40 rounded-2xl px-3.5 py-2.5 text-base font-black text-emerald-400 focus:outline-none">
                     </div>
-
                     <div class="grid grid-cols-2 gap-2 pt-1 text-center">
                         <div class="bg-amoled/90 border border-slate-800 rounded-2xl p-2.5">
                             <span class="text-[10px] text-rose-300 font-bold block">Bu Ay Toplam Gider</span>
@@ -279,7 +246,6 @@
                 </div>
             </div>
 
-            <!-- TOPLU PARA GELDİ: ERKEN KAPATMA MI, VADELİ MEVDUAT MI? -->
             <div class="bg-card border border-slate-800 rounded-3xl p-4 space-y-3">
                 <div class="flex items-center gap-2">
                     <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center text-xs">
@@ -290,7 +256,6 @@
                         <p class="text-[10px] text-slate-400">Erken kapama faiz kazancı ile net vadeli getiriyi kıyaslar.</p>
                     </div>
                 </div>
-
                 <div class="space-y-2">
                     <div class="flex justify-between items-center text-xs">
                         <label class="text-slate-300 font-bold">Toplu Para Tutarı (₺)</label>
@@ -317,11 +282,9 @@
                         </div>
                     </div>
                 </div>
-
                 <div id="advisorResultsBox" class="space-y-2 pt-1"></div>
             </div>
 
-            <!-- VADELİ MEVDUAT HESAPLAMA ARACI -->
             <div class="bg-card border border-slate-800 rounded-3xl p-4 space-y-3">
                 <h3 class="text-xs font-black text-white flex items-center gap-1.5">
                     <i class="fa-solid fa-percent text-emerald-400"></i>
@@ -346,16 +309,10 @@
                     <span id="calcDepNetReturn" class="font-black text-emerald-400">+0 ₺</span>
                 </div>
             </div>
-
         </section>
 
-
-        <!-- =================================================================== -->
         <!-- SEKME 5: PIN KORUMALI ŞİFRELER & GÜVENLİ NOTLAR -->
-        <!-- =================================================================== -->
         <section id="tab-sifreler" class="hidden space-y-3.5">
-
-            <!-- PIN KİLİT EKRANI -->
             <div id="pinLockScreen" class="bg-card border border-slate-800 rounded-3xl p-6 text-center space-y-4">
                 <div class="w-14 h-14 rounded-3xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-2xl mx-auto shadow-lg shadow-emerald-500/20">
                     <i class="fa-solid fa-lock"></i>
@@ -373,10 +330,7 @@
                 </button>
             </div>
 
-            <!-- KİLİT AÇILDIKTAN SONRAKİ KASA EKRANI -->
             <div id="vaultUnlockedContent" class="hidden space-y-3.5">
-
-                <!-- 1. BANKA ŞİFRELERİ BÖLÜMÜ -->
                 <div class="bg-card border border-slate-800 rounded-3xl p-3.5 space-y-3">
                     <div class="flex items-center justify-between">
                         <div>
@@ -398,7 +352,6 @@
                     <div id="vaultPasswordsList" class="space-y-2"></div>
                 </div>
 
-                <!-- 2. GÜVENLİ NOTLAR BÖLÜMÜ (YENİ!) -->
                 <div class="bg-card border border-slate-800 rounded-3xl p-3.5 space-y-3">
                     <div class="flex items-center justify-between">
                         <div>
@@ -415,7 +368,6 @@
                     <div id="vaultNotesList" class="space-y-2"></div>
                 </div>
 
-                <!-- VERİLERİ SIFIRLAMA VE YEDEKLEME -->
                 <div class="bg-card border border-slate-800 rounded-3xl p-4 space-y-3">
                     <h3 class="text-xs font-black text-white uppercase tracking-wider">Veri Yönetimi & Paylaşım</h3>
                     <p class="text-[11px] text-slate-400">Arkadaşına göndermeden önce veya yeni başlamak istediğinde tek tuşla tüm verileri sıfırlayabilirsin.</p>
@@ -434,9 +386,7 @@
                         <i class="fa-solid fa-trash-can mr-1"></i> Tüm Verileri Sıfırla (Tertemiz Yap)
                     </button>
                 </div>
-
             </div>
-
         </section>
 
     </main>
@@ -467,10 +417,7 @@
         </div>
     </nav>
 
-
-    <!-- =================================================================== -->
     <!-- MODAL 1: KREDİ & TNA EKLE / DÜZENLE -->
-    <!-- =================================================================== -->
     <div id="loanModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-card border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-3xl w-full max-w-md p-4 space-y-3 max-h-[92vh] overflow-y-auto">
             <div class="flex justify-between items-center pb-2 border-b border-slate-800">
@@ -482,7 +429,6 @@
 
             <input type="hidden" id="editLoanId">
 
-            <!-- TÜR SEÇİMİ: KREDİ VEYA TNA -->
             <div class="grid grid-cols-2 gap-2">
                 <button type="button" onclick="setModalType('kredi')" id="mType-kredi" class="py-2 rounded-xl border text-xs font-extrabold flex items-center justify-center gap-1.5 bg-purple-600/20 border-purple-500 text-purple-300">
                     <i class="fa-solid fa-building-columns"></i> Kredi
@@ -492,7 +438,6 @@
                 </button>
             </div>
 
-            <!-- BANKA SEÇİMİ (POPÜLER BANKALAR) -->
             <div class="grid grid-cols-2 gap-2">
                 <div>
                     <label class="text-[10px] text-slate-400 font-bold block mb-1">Banka Adı</label>
@@ -518,7 +463,6 @@
                 </div>
             </div>
 
-            <!-- ÇEKİLEN ANA PARA & AYLIK TAKSİT -->
             <div class="grid grid-cols-2 gap-2">
                 <div>
                     <label class="text-[10px] text-emerald-400 font-bold block mb-1">Çekilen Ana Para (₺)</label>
@@ -530,7 +474,6 @@
                 </div>
             </div>
 
-            <!-- TNA ÖZEL SINIRLAMA (MAKS 3 TAKSİT VEYA TEK ÇEKİM) -->
             <div id="tnaInstallmentLimitBox" class="hidden bg-amber-950/30 border border-amber-500/40 rounded-2xl p-2.5 space-y-1.5">
                 <span class="text-[10px] font-extrabold text-amber-300 uppercase">TNA Vade Sınırı (BDDK Kuralı - Maks 3 Ay)</span>
                 <div class="grid grid-cols-3 gap-1.5">
@@ -540,7 +483,6 @@
                 </div>
             </div>
 
-            <!-- ERTELEME SEÇENEĞİ (3 AYA KADAR ERTELEME) -->
             <div class="bg-amoled/80 border border-slate-800 rounded-2xl p-2.5 space-y-2">
                 <label class="text-[10px] text-amber-300 font-extrabold block">Erteleme Var mı? (Taksitler kaç ay sonra başlayacak?)</label>
                 <div class="grid grid-cols-4 gap-1">
@@ -551,7 +493,6 @@
                 </div>
             </div>
 
-            <!-- VADE, KAÇINCI TAKSİT VE ÖDEME GÜNÜ -->
             <div class="grid grid-cols-3 gap-2">
                 <div>
                     <label id="mTotalMonthsLabel" class="text-[10px] text-slate-400 font-bold block mb-1">Toplam Vade</label>
@@ -567,7 +508,6 @@
                 </div>
             </div>
 
-            <!-- AYLIK AKDİ FAİZ ORANI (%) -->
             <div class="bg-amoled/80 border border-slate-800 rounded-2xl p-2.5 space-y-2">
                 <div class="flex items-center justify-between">
                     <label class="text-[10px] text-slate-300 font-bold">Aylık Akdi Faiz Oranı (%)</label>
@@ -581,7 +521,6 @@
                 </div>
             </div>
 
-            <!-- ANLIK ERKEN KAPAMA VE AMORTİSMAN ÖNİZLEMESİ -->
             <div class="bg-emerald-950/25 border border-emerald-500/30 rounded-2xl p-3 space-y-1.5 text-xs">
                 <div class="flex justify-between">
                     <span class="text-slate-400">Kalan Taksit / Durum:</span>
@@ -612,10 +551,7 @@
         </div>
     </div>
 
-
-    <!-- =================================================================== -->
     <!-- MODAL 2: AYLIK FATURA EKLE / DÜZENLE -->
-    <!-- =================================================================== -->
     <div id="billModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-card border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-3xl w-full max-w-md p-4 space-y-3">
             <div class="flex justify-between items-center pb-2 border-b border-slate-800">
@@ -650,10 +586,7 @@
         </div>
     </div>
 
-
-    <!-- =================================================================== -->
     <!-- MODAL 3: YILLIK VERGİ DÜZENLEME MODALI -->
-    <!-- =================================================================== -->
     <div id="taxModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-card border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-3xl w-full max-w-md p-4 space-y-3">
             <div class="flex justify-between items-center pb-2 border-b border-slate-800">
@@ -678,10 +611,7 @@
         </div>
     </div>
 
-
-    <!-- =================================================================== -->
     <!-- MODAL 4: ŞİFRE EKLE / DÜZENLE -->
-    <!-- =================================================================== -->
     <div id="passwordModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-card border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-3xl w-full max-w-md p-4 space-y-3">
             <div class="flex justify-between items-center pb-2 border-b border-slate-800">
@@ -710,10 +640,7 @@
         </div>
     </div>
 
-
-    <!-- =================================================================== -->
-    <!-- MODAL 5: GÜVENLİ NOT EKLE / DÜZENLE (YENİ!) -->
-    <!-- =================================================================== -->
+    <!-- MODAL 5: GÜVENLİ NOT EKLE / DÜZENLE -->
     <div id="noteModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-card border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-3xl w-full max-w-md p-4 space-y-3">
             <div class="flex justify-between items-center pb-2 border-b border-slate-800">
@@ -742,10 +669,7 @@
         </div>
     </div>
 
-
-    <!-- =================================================================== -->
     <!-- MODAL 6: 2 AŞAMALI PIN DEĞİŞTİRME MODALI -->
-    <!-- =================================================================== -->
     <div id="changePinModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-card border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-3xl w-full max-w-md p-5 space-y-3.5">
             <div class="flex justify-between items-center pb-2 border-b border-slate-800">
@@ -769,10 +693,7 @@
         </div>
     </div>
 
-
-    <!-- =================================================================== -->
-    <!-- MODAL 7: HER SAYFAYA ÖZEL REHBER (❓ YARDIM PENCERESİ) -->
-    <!-- =================================================================== -->
+    <!-- MODAL 7: SAYFA REHBERİ -->
     <div id="helpModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-card border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-3xl w-full max-w-md p-5 space-y-3.5 max-h-[85vh] overflow-y-auto">
             <div class="flex justify-between items-center pb-2 border-b border-slate-800">
@@ -791,10 +712,7 @@
         </div>
     </div>
 
-
-    <!-- =================================================================== -->
-    <!-- MODAL 8: SAAT 15:30 ÖDEME ONAY PENCERESİ [EVET / HAYIR] -->
-    <!-- =================================================================== -->
+    <!-- MODAL 8: SAAT 15:30 ÖDEME ONAY PENCERESİ -->
     <div id="dueConfirmModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
         <div class="bg-card border border-rose-500/50 rounded-3xl w-full max-w-sm p-5 space-y-4 text-center urgent-pulse">
             <div class="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-xl mx-auto">
@@ -816,18 +734,13 @@
         </div>
     </div>
 
-
     <!-- BİLDİRİM TOAST MESAJI -->
     <div id="toastBox" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 hidden bg-emerald-500 text-slate-950 text-xs font-black px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2">
         <i class="fa-solid fa-circle-check"></i>
         <span id="toastText">İşlem tamam!</span>
     </div>
 
-
     <script>
-        // =========================================================================
-        // VERİ MODELLERİ VE BAŞLANGIÇ DURUMLARI
-        // =========================================================================
         const MONTH_NAMES = [
             "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
             "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"
@@ -839,7 +752,7 @@
             billSubTab: 'monthly',
             pinUnlocked: false,
             userPin: '1234',
-            calendarOffset: 0, // 0: Güncel ay (-120 ile +120 arası 10 yıl)
+            calendarOffset: 0,
             selectedDay: null,
             pendingConfirmLoanId: null,
             visiblePasswords: new Set(),
@@ -868,7 +781,7 @@
 
         const DEFAULT_LOANS = [
             { id: 'l_1', bank: 'Enpara', type: 'kredi', note: 'İhtiyaç Kredisi', initialPrincipal: 150000, amount: 16500, totalMonths: 12, currentMonth: 4, deferralMonths: 0, day: 15, rate: 4.19, startYear: 2026, startMonth: 6, paidThisMonth: false },
-            { id: 'l_2', bank: 'Akbank', type: 'tna', note: 'TNA Nakit Avans', initialPrincipal: 30000, amount: 11200, totalMonths: 3, currentMonth: 1, deferralMonths: 0, day: 31, rate: 5.00, startYear: 2026, startMonth: 9, paidThisMonth: false }
+            { id: 'l_2', bank: 'Akbank', type: 'tna', note: 'TNA Nakit Avans', initialPrincipal: 30000, amount: 11200, totalMonths: 3, currentMonth: 1, deferralMonths: 0, day: 31, rate: 4.49, startYear: 2026, startMonth: 9, paidThisMonth: false }
         ];
 
         function loadAppData() {
@@ -915,14 +828,11 @@
             localStorage.setItem('fk_pro_data_v2', JSON.stringify(dataToSave));
         }
 
-        // =========================================================================
-        // BANKA AMORTİSMAN & KISTELYEVİM FAİZLİ ERKEN KAPAMA MOTORU
-        // =========================================================================
         function calculateLoanFinancials(loan, targetYear, targetMonth) {
             const totalM = loan.type === 'tna' ? Math.min(3, Math.max(1, parseInt(loan.totalMonths) || 1)) : Math.max(1, parseInt(loan.totalMonths) || 1);
             const pmt = parseFloat(loan.amount) || 0;
             const P0 = parseFloat(loan.initialPrincipal) || (pmt * totalM * 0.7);
-            const rate = parseFloat(loan.rate) || (loan.type === 'tna' ? 5.00 : 4.29);
+            const rate = (loan.rate !== undefined && loan.rate !== null && loan.rate !== "") ? parseFloat(loan.rate) : (loan.type === 'tna' ? 4.49 : 4.29);
             const effMonthlyRate = (rate / 100) * 1.30;
 
             const startYear = loan.startYear || 2026;
@@ -969,9 +879,6 @@
             };
         }
 
-        // =========================================================================
-        // DİNAMİK TAKVİM BİLGİSİ & "BU AYA DÖN"
-        // =========================================================================
         function getCalendarDateInfo(offset) {
             const baseDate = new Date();
             const target = new Date(baseDate.getFullYear(), baseDate.getMonth() + offset, 1);
@@ -1001,9 +908,6 @@
             showToast("Güncel aya dönüldü!");
         }
 
-        // =========================================================================
-        // 1. SEKME: GENEL BORÇ & TAKVİM & BAR RENDER
-        // =========================================================================
         function renderGenelTab() {
             const cal = getCalendarDateInfo(state.calendarOffset);
             document.getElementById('calendarMonthTitle').textContent = `${MONTH_NAMES[cal.month]} ${cal.year}`;
@@ -1029,7 +933,6 @@
             let totalItemsCount = 0;
             const itemsForMonth = [];
 
-            // 1. Krediler ve TNA'lar (31. Gün Eşleme Mantığıyla)
             state.loans.forEach(loan => {
                 const fin = calculateLoanFinancials(loan, cal.year, cal.month);
                 if (fin.isActive && !fin.isDeferral) {
@@ -1038,7 +941,6 @@
                     totalItemsCount++;
 
                     const originalDay = parseInt(loan.day) || 15;
-                    // Akıllı Eşleme: Eğer ay 28/29/30 çekiyorsa ve ödeme günü 31 ise o ayın son gününe bağla
                     let effectiveDay = originalDay;
                     let overflowNote = "";
                     if (originalDay > cal.daysInMonth) {
@@ -1047,11 +949,8 @@
                     }
 
                     const isPaid = cal.isCurrentMonth ? !!loan.paidThisMonth : false;
-                    if (isPaid) {
-                        paidCount++;
-                    } else {
-                        loanRemaining += dueAmount;
-                    }
+                    if (isPaid) paidCount++;
+                    else loanRemaining += dueAmount;
 
                     totalEarlyPayoff += fin.earlyPayoff;
                     totalGrossDebt += fin.remainingGross;
@@ -1071,7 +970,6 @@
                 }
             });
 
-            // 2. Faturalar (31. Gün Eşleme Mantığıyla)
             let billTotal = 0;
             let billRemaining = 0;
             state.bills.forEach(bill => {
@@ -1105,7 +1003,6 @@
                 }
             });
 
-            // 3. Vergiler
             let taxTotal = 0;
             state.taxes.forEach(tax => {
                 if (tax.months.includes(cal.month) && tax.amount && Number(tax.amount) > 0) {
@@ -1137,7 +1034,6 @@
             document.getElementById('gbGrossDebtSum').textContent = formatTL(totalGrossDebt);
             document.getElementById('gbPaidCountBadge').textContent = `${paidCount}/${totalItemsCount} Ödendi`;
 
-            // Dinamik Gün Haritası
             document.getElementById('calDaysLabel').textContent = `Ödeme Günleri (1 - ${cal.daysInMonth})`;
             const todayDate = new Date();
             let calGridHtml = '';
@@ -1171,7 +1067,6 @@
             }
             document.getElementById('calendarGrid').innerHTML = calGridHtml;
 
-            // Gün Detay Gösterimi
             const dayInfoEl = document.getElementById('selectedDayInfo');
             if (state.selectedDay) {
                 const sItems = itemsForMonth.filter(x => x.day === state.selectedDay);
@@ -1197,10 +1092,8 @@
                 dayInfoEl.classList.add('hidden');
             }
 
-            // Gerçek Dinamik 7 Aylık Bar Grafiği
             renderDynamicBarChart();
 
-            // Seçili Aydaki Tüm Kalemler Listesi
             const monthListContainer = document.getElementById('monthItemsList');
             if (itemsForMonth.length === 0) {
                 monthListContainer.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">Bu ay için kayıtlı borç veya ödeme bulunmuyor.</p>`;
@@ -1236,9 +1129,6 @@
             renderGenelTab();
         }
 
-        // =========================================================================
-        // GERÇEK ORANSAL VE DİNAMİK 7 AYLIK BAR GRAFİĞİ
-        // =========================================================================
         function calculateTotalDueForOffset(offset) {
             const cal = getCalendarDateInfo(offset);
             let sum = 0;
@@ -1271,12 +1161,10 @@
                 };
             });
 
-            // 7 ay arasındaki maksimum tutarı bul
             const maxVal = Math.max(...data.map(d => d.total));
             const container = document.getElementById('barChartContainer');
 
             container.innerHTML = data.map(d => {
-                // Dinamik oransal yükseklik: %10 (sıfır/küçük) ile %100 arası
                 let heightPct = 10;
                 if (maxVal > 0) {
                     heightPct = Math.max(12, Math.round((d.total / maxVal) * 100));
@@ -1307,9 +1195,6 @@
             renderAll();
         }
 
-        // =========================================================================
-        // 2. SEKME: KREDİLERİM YÖNETİMİ & MANUEL MÜDAHALE
-        // =========================================================================
         function setLoanFilter(f) {
             state.loanFilter = f;
             ['all', 'kredi', 'tna'].forEach(k => {
@@ -1362,7 +1247,6 @@
                         </div>
                     </div>
 
-                    <!-- İLERLEME ÇUBUĞU -->
                     <div class="bg-amoled/80 border border-slate-800 rounded-2xl p-2.5 space-y-1.5">
                         <div class="flex justify-between text-[10px]">
                             <span class="text-slate-300 font-bold">Çekilen: <strong class="text-white">${formatTL(item.initialPrincipal)}</strong></span>
@@ -1373,7 +1257,6 @@
                         </div>
                     </div>
 
-                    <!-- ERKEN KAPAMA TUTARI VE KÂR -->
                     <div class="grid grid-cols-3 gap-1.5 text-center bg-amoled/50 rounded-2xl p-2 border border-slate-800/60">
                         <div>
                             <p class="text-[9px] text-slate-400">Banka Erken Kapama</p>
@@ -1389,7 +1272,6 @@
                         </div>
                     </div>
 
-                    <!-- MANUEL MÜDAHALE (ÖDENDİ / GERİ AL) -->
                     <div class="flex items-center justify-between pt-0.5">
                         <span class="text-[10px] font-bold ${isPaid ? 'text-emerald-400' : 'text-slate-400'}">
                             ${isPaid ? '✓ Bu ay ödendi olarak işlendi' : `Her ayın ${item.day}'i ödenir`}
@@ -1428,9 +1310,6 @@
             renderAll();
         }
 
-        // =========================================================================
-        // 3. SEKME: FATURA & VERGİ YÖNETİMİ
-        // =========================================================================
         function setBillSubTab(tab) {
             state.billSubTab = tab;
             document.getElementById('subTab-monthly').classList.toggle('hidden', tab !== 'monthly');
@@ -1496,9 +1375,6 @@
             showToast(`${b.name} ödeme durumu güncellendi.`);
         }
 
-        // =========================================================================
-        // 4. SEKME: DANIŞMAN & GELİR DENGESİ & VADELİ MEVDUAT
-        // =========================================================================
         function setAdvisorLumpSum(val) {
             document.getElementById('advLumpSumInput').value = val;
             calculateAdvisorAndBalance();
@@ -1581,9 +1457,6 @@
             document.getElementById('calcDepNetReturn').textContent = '+' + formatTL(net);
         }
 
-        // =========================================================================
-        // 5. SEKME: PIN KORUMALI ŞİFRELER & GÜVENLİ NOTLAR
-        // =========================================================================
         function checkPinEntry(val) {
             if (val.length === 4) {
                 if (val === state.userPin) {
@@ -1705,9 +1578,6 @@
             showToast(`${label} panoya kopyalandı!`);
         }
 
-        // =========================================================================
-        // GÜVENLİ NOT MODAL İŞLEMLERİ (YENİ!)
-        // =========================================================================
         function openNoteModal(id = null) {
             const modal = document.getElementById('noteModal');
             const delBtn = document.getElementById('deleteNoteBtn');
@@ -1762,7 +1632,6 @@
             showToast('Not silindi.');
         }
 
-        // 2 AŞAMALI PIN DEĞİŞTİRME
         function openChangePinModal() {
             document.getElementById('newPin1').value = '';
             document.getElementById('newPin2').value = '';
@@ -1851,9 +1720,6 @@
             r.readAsText(file);
         }
 
-        // =========================================================================
-        // SAAT 15:30 VE 1 GÜN ÖNCE HATIRLATMA MOTORU
-        // =========================================================================
         function checkDueAlerts(forceCheck = false) {
             const now = new Date();
             const today = now.getDate();
@@ -1925,13 +1791,10 @@
             state.pendingConfirmLoanId = null;
         }
 
-        // =========================================================================
-        // KREDİ MODAL İŞLEMLERİ
-        // =========================================================================
         let modalLoanType = 'kredi';
         let modalDeferralMonths = 0;
 
-        function setModalType(t) {
+        function setModalType(t, preserveCurrentRate = false) {
             modalLoanType = t;
             document.getElementById('mType-kredi').className = t === 'kredi'
                 ? "py-2 rounded-xl border text-xs font-extrabold flex items-center justify-center gap-1.5 bg-purple-600/20 border-purple-500 text-purple-300"
@@ -1942,6 +1805,7 @@
 
             const tnaBox = document.getElementById('tnaInstallmentLimitBox');
             const totalMonthsInput = document.getElementById('mTotalMonths');
+            const rateInput = document.getElementById('mRate');
 
             if (t === 'tna') {
                 tnaBox.classList.remove('hidden');
@@ -1949,11 +1813,16 @@
                 let v = parseInt(totalMonthsInput.value) || 3;
                 if (v > 3) v = 3;
                 setTnaVadePreset(v);
-                if (!document.getElementById('mRate').value) document.getElementById('mRate').value = 5.00;
+                if (!preserveCurrentRate && !rateInput.value) {
+                    rateInput.value = 4.49;
+                }
             } else {
                 tnaBox.classList.add('hidden');
                 totalMonthsInput.max = 120;
                 document.getElementById('mAmountLabel').textContent = 'Aylık Taksit Tutarı (₺)';
+                if (!preserveCurrentRate && !rateInput.value) {
+                    rateInput.value = 4.49;
+                }
             }
             updateLoanModalCalculations();
         }
@@ -2002,6 +1871,9 @@
         }
 
         function updateLoanModalCalculations() {
+            const rateVal = document.getElementById('mRate').value;
+            const parsedRate = rateVal !== "" ? parseFloat(rateVal) : (modalLoanType === 'tna' ? 4.49 : 4.29);
+
             const tempLoan = {
                 type: modalLoanType,
                 initialPrincipal: parseFloat(document.getElementById('mInitialPrincipal').value) || 0,
@@ -2010,7 +1882,7 @@
                 currentMonth: parseInt(document.getElementById('mCurrentMonth').value) || 1,
                 deferralMonths: modalDeferralMonths,
                 day: parseInt(document.getElementById('mDay').value) || 15,
-                rate: parseFloat(document.getElementById('mRate').value) || 4.29,
+                rate: parsedRate,
                 startYear: 2026,
                 startMonth: 9
             };
@@ -2038,9 +1910,14 @@
                 document.getElementById('mTotalMonths').value = item.totalMonths;
                 document.getElementById('mCurrentMonth').value = item.currentMonth;
                 document.getElementById('mDay').value = item.day;
-                setModalType(item.type || 'kredi');
-                document.getElementById('mRate').value = item.rate;
+
+                // Önce tip ve ertelemeyi ayarla (mevcut faizi ezmemesi için koruma bayrağıyla):
+                setModalType(item.type || 'kredi', true);
                 setDeferralPreset(item.deferralMonths || 0);
+
+                // Kaydedilmiş faiz oranını kesin olarak kutuya yaz:
+                document.getElementById('mRate').value = item.rate !== undefined ? item.rate : 4.49;
+
                 delBtn.classList.remove('hidden');
             } else {
                 document.getElementById('loanModalTitle').textContent = 'Yeni Kredi / TNA Ekle';
@@ -2052,7 +1929,7 @@
                 document.getElementById('mCurrentMonth').value = 1;
                 document.getElementById('mDay').value = 15;
                 document.getElementById('mRate').value = 4.49;
-                setModalType('kredi');
+                setModalType('kredi', false);
                 setDeferralPreset(0);
                 delBtn.classList.add('hidden');
             }
@@ -2076,7 +1953,8 @@
             if (modalLoanType === 'tna') totalMonths = Math.min(3, Math.max(1, totalMonths));
             const currentMonth = Math.min(totalMonths, Math.max(1, parseInt(document.getElementById('mCurrentMonth').value) || 1));
             const day = Math.min(31, Math.max(1, parseInt(document.getElementById('mDay').value) || 15));
-            const rate = parseFloat(document.getElementById('mRate').value) || 4.29;
+            const rawRate = document.getElementById('mRate').value;
+            const rate = rawRate !== "" ? parseFloat(rawRate) : (modalLoanType === 'tna' ? 4.49 : 4.29);
 
             if (amount <= 0) {
                 showToast('Lütfen geçerli bir taksit tutarı girin!');
@@ -2121,9 +1999,6 @@
             showToast('Kredi silindi.');
         }
 
-        // =========================================================================
-        // FATURA VE VERGİ MODALLARI
-        // =========================================================================
         function openBillModal(id = null) {
             const modal = document.getElementById('billModal');
             const delBtn = document.getElementById('deleteBillBtn');
@@ -2209,9 +2084,6 @@
             showToast('Vergi tutarı güncellendi.');
         }
 
-        // =========================================================================
-        // ŞİFRE MODALI
-        // =========================================================================
         function openPasswordModal(id = null) {
             const modal = document.getElementById('passwordModal');
             const delBtn = document.getElementById('deletePwdBtn');
@@ -2266,9 +2138,6 @@
             showToast('Şifre silindi.');
         }
 
-        // =========================================================================
-        // REHBER (❓ YARDIM) İÇERİKLERİ VE MODALI
-        // =========================================================================
         const HELP_CONTENT = {
             genel: {
                 title: "Genel Borç Rehberi",
@@ -2325,9 +2194,6 @@
             document.getElementById('helpModal').classList.remove('flex');
         }
 
-        // =========================================================================
-        // SEKME YÖNETİMİ & TOAST
-        // =========================================================================
         const TAB_NAMES = {
             genel: 'Genel Borç',
             krediler: 'Kredilerim',
@@ -2388,67 +2254,110 @@
             checkDueAlerts();
         }
 
-        function requestPushPermission() {
-    if ("Notification" in window && Notification.permission !== "granted") {
-        Notification.requestPermission();
-    }
-}
+        // =========================================================================
+        // SİSTEM BİLDİRİM MOTORU (TWA / SERVICE WORKER DESTEKLİ)
+        // =========================================================================
+        function requestPushPermission(callback = null) {
+            if (!("Notification" in window)) {
+                if (callback) callback(false);
+                return;
+            }
+            Notification.requestPermission().then(permission => {
+                if (callback) callback(permission === "granted");
+            });
+        }
 
-function sendNativeNotification(title, body) {
-    if ("Notification" in window && Notification.permission === "granted") {
-        new Notification(title, {
-            body: body,
-            icon: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png"
-        });
-    }
-}
+        function sendNativeNotification(title, body) {
+            if (!("Notification" in window) || Notification.permission !== "granted") return;
 
-// 1 Gün Önce ve Saat 15:30 Sistem Bildirim Motoru
-function runNativeDueNotifications() {
-    const now = new Date();
-    const today = now.getDate();
-    const currentHour = now.getHours();
-    const currentMin = now.getMinutes();
-
-    state.loans.forEach(loan => {
-        if (loan.paidThisMonth) return;
-        const dueDay = parseInt(loan.day) || 15;
-
-        // 1 Gün Önce Bildirimi
-        if (dueDay === today + 1) {
-            const key1Gun = `notif_1gun_${loan.id}_${today}`;
-            if (!localStorage.getItem(key1Gun)) {
-                sendNativeNotification(
-                    "⚠️ Yaklaşan Ödeme Hatırlatması",
-                    `Yarın ${loan.bank} (${loan.note || 'Taksit'}) için ${formatTL(loan.amount)} ödemeniz var!`
-                );
-                localStorage.setItem(key1Gun, "ok");
+            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.ready.then(reg => {
+                    reg.showNotification(title, {
+                        body: body,
+                        icon: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png",
+                        badge: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png",
+                        vibrate: [200, 100, 200]
+                    });
+                }).catch(() => {
+                    new Notification(title, {
+                        body: body,
+                        icon: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png"
+                    });
+                });
+            } else {
+                new Notification(title, {
+                    body: body,
+                    icon: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png"
+                });
             }
         }
 
-        // Ödeme Günü Saat 15:30 Bildirimi
-        if (dueDay === today) {
-            if (currentHour > 15 || (currentHour === 15 && currentMin >= 30)) {
-                const keyBugun = `notif_1530_${loan.id}_${today}`;
-                if (!localStorage.getItem(keyBugun)) {
+        function manuelBildirimTesti() {
+            if (!("Notification" in window)) {
+                showToast("Cihazınızda bildirim desteği bulunamadı.");
+                return;
+            }
+
+            requestPushPermission(granted => {
+                if (granted) {
                     sendNativeNotification(
-                        "🔔 15:30 Ödeme Kontrolü",
-                        `Bugün ${loan.bank} borcunu (${formatTL(loan.amount)}) ödedin mi? Onaylamak için dokun.`
+                        "Finans Kasam Pro",
+                        "Bildirim sistemi hazır! Ödeme vadesi ve 15:30 kontrolleri aktif. 🔔"
                     );
-                    localStorage.setItem(keyBugun, "ok");
+                    showToast("Bildirim izni onaylandı ve test gönderildi!");
+                    runNativeDueNotifications();
+                } else {
+                    showToast("Bildirim izni verilmedi. Lütfen uygulama ayarlarından açın.");
                 }
-            }
+            });
         }
-    });
-}
 
-window.onload = function () {
-    loadAppData();
-    renderAll();
-    requestPushPermission();
-    runNativeDueNotifications();
-    setInterval(runNativeDueNotifications, 10 * 60 * 1000); // 10 dakikada bir arka plan kontrolü
-};
+        function runNativeDueNotifications() {
+            if (!("Notification" in window) || Notification.permission !== "granted") return;
+
+            const now = new Date();
+            const today = now.getDate();
+            const currentHour = now.getHours();
+            const currentMin = now.getMinutes();
+
+            state.loans.forEach(loan => {
+                if (loan.paidThisMonth) return;
+                const dueDay = parseInt(loan.day) || 15;
+
+                // 1 Gün Önce Bildirimi
+                if (dueDay === today + 1) {
+                    const key1Gun = `notif_1gun_${loan.id}_${today}`;
+                    if (!localStorage.getItem(key1Gun)) {
+                        sendNativeNotification(
+                            "⚠️ Yaklaşan Ödeme Hatırlatması",
+                            `Yarın ${loan.bank} (${loan.note || 'Taksit'}) için ${formatTL(loan.amount)} ödemeniz var!`
+                        );
+                        localStorage.setItem(key1Gun, "ok");
+                    }
+                }
+
+                // Ödeme Günü Saat 15:30 Bildirimi
+                if (dueDay === today) {
+                    if (currentHour > 15 || (currentHour === 15 && currentMin >= 30)) {
+                        const keyBugun = `notif_1530_${loan.id}_${today}`;
+                        if (!localStorage.getItem(keyBugun)) {
+                            sendNativeNotification(
+                                "🔔 15:30 Ödeme Kontrolü",
+                                `Bugün ${loan.bank} borcunu (${formatTL(loan.amount)}) ödedin mi? Kontrol etmek için dokun.`
+                            );
+                            localStorage.setItem(keyBugun, "ok");
+                        }
+                    }
+                }
+            });
+        }
+
+        window.onload = function () {
+            loadAppData();
+            renderAll();
+            runNativeDueNotifications();
+            setInterval(runNativeDueNotifications, 5 * 60 * 1000);
+        };
     </script>
 </body>
 </html>
