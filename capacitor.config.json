@@ -1,0 +1,13 @@
+{
+  "appId": "com.finans.kasam",
+  "appName": "Finans Kasam Pro",
+  "webDir": ".",
+  "bundledWebRuntime": false,
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_icon_config_sample",
+      "iconColor": "#10b981",
+      "sound": "beep.wav"
+    }
+  }
+}
