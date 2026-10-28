@@ -2312,12 +2312,53 @@ function manuelBildirimTesti() {
     }
 }
 
-        window.onload = function () {
-            loadAppData();
-            renderAll();
-            runNativeDueNotifications();
-            setInterval(runNativeDueNotifications, 5 * 60 * 1000);
-        };
-    </script>
+// 1 GÜN ÖNCE VE ÖDEME GÜNÜ SAAT 15:30 BİLDİRİM MOTORU
+function runNativeDueNotifications() {
+    if (!("Notification" in window) || Notification.permission !== "granted") return;
+
+    const now = new Date();
+    const today = now.getDate();
+    const currentHour = now.getHours();
+    const currentMin = now.getMinutes();
+
+    state.loans.forEach(loan => {
+        if (loan.paidThisMonth) return;
+        const dueDay = parseInt(loan.day) || 15;
+
+        // 1. Durum: 1 Gün Önce Bildirimi
+        if (dueDay === today + 1) {
+            const key1Gun = `notif_1gun_${loan.id}_${today}`;
+            if (!localStorage.getItem(key1Gun)) {
+                sendNativeNotification(
+                    "⚠️ Yaklaşan Ödeme Hatırlatması",
+                    `Yarın ${loan.bank} (${loan.note || 'Taksit'}) için ${formatTL(loan.amount)} ödemeniz var!`
+                );
+                localStorage.setItem(key1Gun, "ok");
+            }
+        }
+
+        // 2. Durum: Ödeme Günü Saat 15:30 Bildirimi
+        if (dueDay === today) {
+            if (currentHour > 15 || (currentHour === 15 && currentMin >= 30)) {
+                const keyBugun = `notif_1530_${loan.id}_${today}`;
+                if (!localStorage.getItem(keyBugun)) {
+                    sendNativeNotification(
+                        "🔔 15:30 Ödeme Kontrolü",
+                        `Bugün ${loan.bank} borcunu (${formatTL(loan.amount)}) ödedin mi? Kontrol etmek için dokun.`
+                    );
+                    localStorage.setItem(keyBugun, "ok");
+                }
+            }
+        }
+    });
+}
+
+window.onload = function () {
+    loadAppData();
+    renderAll();
+    runNativeDueNotifications();
+    setInterval(runNativeDueNotifications, 5 * 60 * 1000);
+};
+</script>
 </body>
 </html>
