@@ -2415,6 +2415,47 @@ window.onload = function () {
     planlaVeCalistirBildirimler();
     setInterval(planlaVeCalistirBildirimler, 5 * 60 * 1000);
 };
+// DOSYA YÜKLEME KESİN ÇÖZÜMÜ
+function handleFileSelect(event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const rawData = JSON.parse(e.target.result);
+            let finalData = Array.isArray(rawData) ? { loans: rawData, bills: [], taxes: [], passwords: [], notes: [] } : rawData;
+
+            state = finalData;
+            localStorage.setItem('finansKasamData', JSON.stringify(finalData));
+
+            if (typeof planlaVeCalistirBildirimler === "function") {
+                planlaVeCalistirBildirimler();
+            }
+
+            location.reload();
+        } catch (err) {
+            alert("Hata: " + err.message);
+        }
+    };
+    reader.readAsText(file);
+}
+
+// Buton tıklandığında input'u tetikleme
+function triggerBackupImport() {
+    let input = document.getElementById('backupFileInput');
+    if (!input) {
+        input = document.createElement('input');
+        input.type = 'file';
+        input.id = 'backupFileInput';
+        input.accept = '*/*';
+        input.style.display = 'none';
+        document.body.appendChild(input);
+    }
+    input.onchange = handleFileSelect;
+    input.value = '';
+    input.click();
+}
 </script>
 </body>
 </html>
