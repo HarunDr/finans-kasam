@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="tr" class="dark">
 <head>
-    <link rel="manifest" href="manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Finans Kasam Pro S25</title>
+    <title>Finans Kasam Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -15,8 +14,8 @@
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        amoled: '#000000',
-                        card: '#0f172a',
+                        amoled: '#070b14',
+                        card: '#111827',
                         cardHover: '#1e293b',
                         emeraldAccent: '#10b981'
                     }
@@ -26,446 +25,2325 @@
     </script>
     <style>
         body {
-            background-color: #000000;
+            background-color: #070b14;
             color: #f8fafc;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
         }
         ::-webkit-scrollbar { width: 0px; background: transparent; }
-        .safe-bottom { padding-bottom: calc(6rem + env(safe-area-inset-bottom)); }
+        .safe-bottom { padding-bottom: calc(5.8rem + env(safe-area-inset-bottom)); }
         @keyframes pulse-border {
-            0%, 100% { border-color: rgba(244, 63, 94, 0.8); }
-            50% { border-color: rgba(244, 63, 94, 0.2); }
+            0%, 100% { border-color: rgba(244, 63, 94, 0.8); box-shadow: 0 0 15px rgba(244, 63, 94, 0.2); }
+            50% { border-color: rgba(244, 63, 94, 0.2); box-shadow: none; }
         }
-        .urgent-border { animation: pulse-border 2s infinite; }
+        .urgent-pulse { animation: pulse-border 2s infinite ease-in-out; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col max-w-md mx-auto relative bg-amoled border-x border-slate-900 shadow-2xl">
+<body class="min-h-screen flex flex-col max-w-md mx-auto relative bg-amoled border-x border-slate-800/60 shadow-2xl">
 
-    <!-- ÜST BAR -->
-    <header class="sticky top-0 z-30 bg-amoled/95 backdrop-blur-xl border-b border-slate-900 px-4 py-3 flex items-center justify-between">
+    <!-- ÜST BAR (Minimalist One UI Header) -->
+    <header class="sticky top-0 z-30 bg-amoled/95 backdrop-blur-xl border-b border-slate-800/80 px-4 py-3 flex items-center justify-between">
         <div class="flex items-center gap-2.5">
-            <div onclick="switchTab('genel')" class="w-9 h-9 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 p-0.5 shadow-lg shadow-emerald-500/20 cursor-pointer active:scale-95 transition">
+            <div class="w-9 h-9 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 p-0.5 shadow-lg shadow-emerald-500/20 flex items-center justify-center">
                 <div class="w-full h-full bg-amoled rounded-[14px] flex items-center justify-center">
-                    <i class="fa-solid fa-vault text-emerald-400 text-sm"></i>
+                    <i class="fa-solid fa-chart-pie text-emerald-400 text-sm"></i>
                 </div>
             </div>
             <div>
-                <div class="flex items-center gap-1.5">
+                <div class="flex items-center gap-2">
                     <h1 id="headerTitle" class="text-base font-black tracking-tight text-white">Genel Borç</h1>
-                    <span id="todayBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">27 Eki 2026</span>
+                    <span id="headerDateBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"></span>
                 </div>
             </div>
         </div>
 
-        <div class="flex items-center gap-1.5">
-            <button onclick="openPageHelpModal()" class="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 flex items-center justify-center text-xs active:scale-95 transition" title="Bu Sayfanın Rehberi">
-                <i class="fa-solid fa-question text-emerald-400"></i>
+        <!-- SAĞ ÜST İŞLEM BUTONLARI -->
+        <div class="flex items-center gap-2">
+            <button onclick="checkDueAlerts(true)" class="w-8 h-8 rounded-xl bg-slate-800/90 text-amber-300 hover:text-white flex items-center justify-center text-xs border border-slate-700 active:scale-95 transition" title="15:30 Ödeme Kontrolü">
+                <i class="fa-regular fa-clock"></i>
+            </button>
+            <button onclick="openTabHelpModal()" class="w-8 h-8 rounded-xl bg-slate-800/90 text-emerald-400 hover:text-white flex items-center justify-center text-xs font-black border border-slate-700 active:scale-95 transition" title="Sayfa Rehberi">
+                <i class="fa-solid fa-question"></i>
             </button>
         </div>
     </header>
 
-    <!-- ANA İÇERİK -->
-    <main class="flex-1 px-3.5 pt-3 safe-bottom">
+    <!-- SAAT 15:30 / 1 GÜN ÖNCE ONAY VE UYARI BANNERI -->
+    <div id="urgentAlertContainer" class="px-3.5 pt-2 hidden"></div>
 
-        <!-- SEKME 1: 📊 GENEL BORÇ & DİNAMİK TAKVİM -->
+    <!-- ANA İÇERİK (5 BAĞIMSIZ SEKME) -->
+    <main class="flex-1 px-3.5 pt-2.5 safe-bottom">
+
+        <!-- =================================================================== -->
+        <!-- SEKME 1: GENEL BORÇ & 10 YILLIK TAKVİM & DİNAMİK 7'Lİ BAR TABLOSU -->
+        <!-- =================================================================== -->
         <section id="tab-genel" class="space-y-3.5">
-            <div id="urgentAlertBox" class="hidden"></div>
 
-            <div class="bg-gradient-to-br from-slate-950 via-card to-emerald-950/30 border border-slate-800 rounded-3xl p-4 shadow-xl space-y-3">
+            <!-- AY & YIL GEZİNME BAR + "BU AYA DÖN" HIZLI BUTONU -->
+            <div class="bg-card border border-slate-800 rounded-3xl p-3 flex items-center justify-between shadow-lg">
+                <button onclick="changeMonthOffset(-1)" class="w-9 h-9 rounded-2xl bg-amoled hover:bg-slate-800 text-slate-300 flex items-center justify-center active:scale-90 transition border border-slate-800">
+                    <i class="fa-solid fa-chevron-left text-xs"></i>
+                </button>
+                <div class="text-center flex-1 px-2">
+                    <h2 id="calendarMonthTitle" class="text-sm font-black text-white tracking-wide">Ekim 2026</h2>
+                    <div class="flex items-center justify-center gap-2 mt-0.5">
+                        <span id="calendarMonthSub" class="text-[10px] font-bold text-emerald-400">Günümüz</span>
+                        <!-- BU AYA DÖN BUTONU -->
+                        <button id="returnToCurrentMonthBtn" onclick="resetToCurrentMonth()" class="hidden text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 active:scale-95 transition hover:bg-emerald-500/30">
+                            <i class="fa-solid fa-rotate-left mr-0.5"></i> Bu Aya Dön
+                        </button>
+                    </div>
+                </div>
+                <button onclick="changeMonthOffset(1)" class="w-9 h-9 rounded-2xl bg-amoled hover:bg-slate-800 text-slate-300 flex items-center justify-center active:scale-90 transition border border-slate-800">
+                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                </button>
+            </div>
+
+            <!-- SEÇİLİ AYIN ÖZET KARTI -->
+            <div class="bg-gradient-to-br from-slate-900 via-card to-emerald-950/30 border border-slate-800 rounded-3xl p-4 shadow-xl space-y-3">
                 <div class="flex items-center justify-between">
                     <div>
-                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-400 block">Tek Bakışta Durum</span>
-                        <h2 class="text-sm font-black text-white">Genel Borç ve Erken Kapama</h2>
+                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-400">Bu Ay Ödenecek Toplam Yük</span>
+                        <div class="flex items-baseline gap-2 mt-0.5">
+                            <span id="gbTotalMonthDue" class="text-xl font-black text-white">0 ₺</span>
+                            <span id="gbMonthRemainingDue" class="text-xs font-bold text-amber-400">Kalan: 0 ₺</span>
+                        </div>
                     </div>
-                    <button onclick="speakGeneralSummary()" class="bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 active:scale-95 transition">
-                        <i class="fa-solid fa-volume-high"></i>
-                        <span>Sesli Oku</span>
-                    </button>
+                    <span id="gbPaidCountBadge" class="text-[10px] font-bold px-2 py-1 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">0/0 Ödendi</span>
                 </div>
 
-                <!-- 3'lü Özet Kutu Yapısı ("Kalan" kısmı silindi) -->
-                <div class="grid grid-cols-3 gap-2">
-                    <div class="bg-amoled border border-slate-900 rounded-2xl p-2.5">
-                        <p class="text-[9px] text-slate-400 font-bold">Bu Ay Toplam Taksit</p>
-                        <p id="gbMonthlyTotal" class="text-xs font-black text-white mt-1">0 ₺</p>
+                <div class="grid grid-cols-3 gap-2 pt-1 border-t border-slate-800/80 text-center">
+                    <div class="bg-amoled/80 rounded-2xl p-2 border border-slate-800/60">
+                        <span class="text-[9px] text-purple-300 font-extrabold block">Kredi & TNA</span>
+                        <span id="gbBreakdownLoan" class="text-xs font-black text-white mt-0.5 block">0 ₺</span>
                     </div>
-                    <div class="bg-amoled border border-slate-900 rounded-2xl p-2.5">
-                        <p class="text-[9px] text-slate-400 font-bold">Vade Sonu Toplam</p>
-                        <p id="gbGrossTotal" class="text-xs font-black text-rose-400 mt-1">0 ₺</p>
+                    <div class="bg-amoled/80 rounded-2xl p-2 border border-slate-800/60">
+                        <span class="text-[9px] text-blue-300 font-extrabold block">Faturalar</span>
+                        <span id="gbBreakdownBill" class="text-xs font-black text-white mt-0.5 block">0 ₺</span>
                     </div>
-                    <div class="bg-emerald-950/35 border border-emerald-500/40 rounded-2xl p-2.5">
-                        <p class="text-[9px] text-emerald-300 font-extrabold">Erken Kapama</p>
-                        <p id="gbEarlyPayoffTotal" class="text-xs font-black text-emerald-400 mt-1">0 ₺</p>
+                    <div class="bg-amoled/80 rounded-2xl p-2 border border-slate-800/60">
+                        <span class="text-[9px] text-amber-300 font-extrabold block">Sabit Vergi</span>
+                        <span id="gbBreakdownTax" class="text-xs font-black text-white mt-0.5 block">0 ₺</span>
+                    </div>
+                </div>
+
+                <!-- GENEL ERKEN KAPAMA VE TOPLAM VADE BORCU -->
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <div class="bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-2.5">
+                        <span class="text-[10px] font-extrabold text-emerald-300 block">Bankadan Erken Kapama</span>
+                        <span id="gbEarlyPayoffSum" class="text-xs font-black text-emerald-400 mt-0.5 block">0 ₺</span>
+                    </div>
+                    <div class="bg-rose-950/30 border border-rose-500/30 rounded-2xl p-2.5">
+                        <span class="text-[10px] font-extrabold text-rose-300 block">Vade Sonu Brüt Borç</span>
+                        <span id="gbGrossDebtSum" class="text-xs font-black text-rose-400 mt-0.5 block">0 ₺</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Takvim ve 20 Yıllık Simülasyon Gezintisi -->
-            <div class="bg-card border border-slate-800 rounded-3xl p-3.5 space-y-3">
+            <!-- 1 - 31 GÜNLÜK DİNAMİK TAKVİM HARİTASI (31. GÜN EŞLEME DESTEKLİ) -->
+            <div class="bg-card border border-slate-800 rounded-3xl p-3.5 space-y-2">
                 <div class="flex items-center justify-between">
-                    <div>
-                        <span id="calendarTitleLabel" class="text-xs font-extrabold text-white flex items-center gap-1.5">
-                            <i class="fa-regular fa-calendar-check text-emerald-400"></i>
-                            <span>Ekim 2026 Ödeme Takvimi</span>
-                        </span>
-                        <p id="calendarFullDateSubtitle" class="text-[10px] text-slate-400 font-semibold mt-0.5">Geçmiş veya gelecek simülasyonu</p>
-                    </div>
-                    <div class="flex items-center gap-1">
-                        <button onclick="changeCalendarMonth(-1)" class="w-7 h-7 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 flex items-center justify-center text-xs active:scale-95" title="1 Ay Geri"><i class="fa-solid fa-chevron-left"></i></button>
-                        <button onclick="resetCalendarToCurrent()" class="px-2 py-1 rounded-xl bg-slate-900 border border-slate-800 text-[10px] font-bold text-emerald-400 active:scale-95">Bugün</button>
-                        <button onclick="changeCalendarMonth(1)" class="w-7 h-7 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 flex items-center justify-center text-xs active:scale-95" title="1 Ay İleri"><i class="fa-solid fa-chevron-right"></i></button>
+                    <span class="text-xs font-extrabold text-white flex items-center gap-1.5">
+                        <i class="fa-regular fa-calendar-check text-emerald-400"></i>
+                        <span id="calDaysLabel">Ödeme Günleri (1 - 31)</span>
+                    </span>
+                    <div class="flex items-center gap-2 text-[10px] text-slate-400">
+                        <span class="flex items-center gap-1"><i class="w-2 h-2 rounded-full bg-rose-500 inline-block"></i> Bekliyor</span>
+                        <span class="flex items-center gap-1"><i class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></i> Ödendi</span>
                     </div>
                 </div>
-
+                <!-- Gün Kutucukları -->
                 <div id="calendarGrid" class="grid grid-cols-7 gap-1.5"></div>
-                <p id="selectedDayInfo" class="text-[11px] font-semibold text-emerald-300 bg-amoled border border-slate-900 rounded-xl px-3 py-1.5 hidden"></p>
-
-                <div class="bg-amoled/90 border border-slate-900 rounded-2xl p-3 flex items-center justify-between">
-                    <div>
-                        <span id="selectedMonthNameLabel" class="text-[10px] font-extrabold text-emerald-400 uppercase">Seçilen Ay Toplam Ödemesi</span>
-                        <p class="text-xs text-slate-400 mt-0.5">Takvimle senkronize simülasyon</p>
-                    </div>
-                    <span id="selectedMonthTotalLoad" class="text-sm font-black text-white">0 ₺</span>
-                </div>
+                <!-- Gün Detay Bilgisi -->
+                <div id="selectedDayInfo" class="hidden text-xs bg-amoled border border-slate-800 rounded-2xl p-3 text-slate-200"></div>
             </div>
 
-            <!-- 7 Aylık Bar Tablosu -->
-            <div class="bg-card border border-slate-800 rounded-3xl p-3.5 space-y-2.5">
+            <!-- 7 AYLIK GERÇEK DİNAMİK ÖLÇEKLİ BAR GRAFİĞİ -->
+            <div class="bg-card border border-slate-800 rounded-3xl p-4 space-y-3">
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-extrabold text-white flex items-center gap-1.5">
                         <i class="fa-solid fa-chart-column text-emerald-400"></i>
-                        <span>7 Aylık Ödeme Bar Tablosu</span>
+                        <span>7 Aylık Dinamik Ödeme Yükü</span>
                     </span>
-                    <span class="text-[10px] text-amber-400 font-bold">Seçili Ay: Turuncu</span>
+                    <span class="text-[10px] text-slate-400">Yüksekliğe göre oransal</span>
                 </div>
-                <div id="sevenMonthBarChart" class="space-y-2 pt-1"></div>
+                <div id="barChartContainer" class="flex items-end justify-between gap-2 h-44 pt-6 px-1"></div>
             </div>
+
+            <!-- SEÇİLİ AYDAKİ TÜM KALEMLERİN LİSTESİ -->
+            <div class="bg-card border border-slate-800 rounded-3xl p-3.5 space-y-2.5">
+                <h3 class="text-xs font-black text-white uppercase tracking-wider">Bu Ayki Tüm Kalemler</h3>
+                <div id="monthItemsList" class="space-y-2"></div>
+            </div>
+
         </section>
 
-        <!-- SEKME 2: 💳 KREDİLERİM -->
-        <section id="tab-krediler" class="hidden space-y-3">
+
+        <!-- =================================================================== -->
+        <!-- SEKME 2: KREDİLERİM (KREDİ VE TNA YÖNETİMİ) -->
+        <!-- =================================================================== -->
+        <section id="tab-krediler" class="hidden space-y-3.5">
+
+            <!-- FİLTRE VE YENİ KREDİ BUTONU -->
             <div class="bg-card border border-slate-800 rounded-2xl p-2.5 flex items-center justify-between gap-2">
-                <div class="flex gap-1 bg-amoled p-1 rounded-xl border border-slate-900 text-[11px] font-extrabold overflow-x-auto">
+                <div class="flex gap-1 bg-amoled p-1 rounded-xl border border-slate-800 text-[11px] font-extrabold overflow-x-auto">
                     <button onclick="setLoanFilter('all')" id="lf-all" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 text-slate-950 transition whitespace-nowrap">Tümü</button>
-                    <button onclick="setLoanFilter('kredi')" id="lf-kredi" class="px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition whitespace-nowrap">Krediler</button>
-                    <button onclick="setLoanFilter('tna')" id="lf-tna" class="px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition whitespace-nowrap">Nakit Avans</button>
+                    <button onclick="setLoanFilter('kredi')" id="lf-kredi" class="px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition whitespace-nowrap">Kredi</button>
+                    <button onclick="setLoanFilter('tna')" id="lf-tna" class="px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition whitespace-nowrap">TNA</button>
                 </div>
-                <button onclick="openLoanModal()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 px-3 py-2 rounded-xl text-xs font-black flex items-center gap-1 shrink-0 active:scale-95 transition">
+                <button onclick="openLoanModal()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 px-3 py-2 rounded-xl text-xs font-black flex items-center gap-1 shrink-0 shadow-md active:scale-95 transition">
                     <i class="fa-solid fa-plus"></i>
-                    <span>Yeni Ekle</span>
+                    <span>Kredi / TNA Ekle</span>
                 </button>
             </div>
-            <div id="loansListContainer" class="space-y-2.5"></div>
+
+            <!-- KREDİ KARTLARI LİSTESİ -->
+            <div id="loansListContainer" class="space-y-3"></div>
+
         </section>
 
-        <!-- SEKME 3: 🧾 FATURA & VERGİ -->
+
+        <!-- =================================================================== -->
+        <!-- SEKME 3: FATURA & VERGİ -->
+        <!-- =================================================================== -->
         <section id="tab-fatura" class="hidden space-y-3.5">
-            <div class="grid grid-cols-2 gap-1.5 bg-card p-1.5 rounded-2xl border border-slate-800 text-xs font-extrabold">
-                <button onclick="setBillSubTab('aylik')" id="btnSubAylik" class="py-2.5 rounded-xl bg-emerald-600 text-slate-950 transition">Aylık Faturalar & Kira</button>
-                <button onclick="setBillSubTab('yillik')" id="btnSubYillik" class="py-2.5 rounded-xl text-slate-400 hover:text-white transition">Yıllık Vergiler</button>
+
+            <!-- İKİ ŞIK GEÇİŞ SEÇİCİ -->
+            <div class="grid grid-cols-2 gap-1.5 bg-amoled p-1 rounded-2xl border border-slate-800 text-xs font-extrabold">
+                <button onclick="setBillSubTab('monthly')" id="subTabBtn-monthly" class="py-2.5 px-3 rounded-xl bg-blue-600 text-white transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-receipt"></i>
+                    <span>Aylık Faturalar</span>
+                </button>
+                <button onclick="setBillSubTab('yearly')" id="subTabBtn-yearly" class="py-2.5 px-3 rounded-xl text-slate-400 hover:text-white transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-landmark"></i>
+                    <span>Yıllık Vergiler</span>
+                </button>
             </div>
 
-            <div id="subAreaAylik" class="space-y-3">
-                <div class="bg-card border border-slate-800 rounded-3xl p-4 space-y-3">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-xs font-black text-white uppercase tracking-wider">Aylık Faturalar & Kira</h3>
-                            <p class="text-[10px] text-slate-400">Değişken tutar girilebilir.</p>
-                        </div>
-                        <button onclick="openBillModal('aylik')" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 px-2.5 py-1.5 rounded-xl text-[11px] font-black"><i class="fa-solid fa-plus mr-1"></i>Ekle</button>
-                    </div>
-                    <div id="monthlyBillsList" class="space-y-2"></div>
+            <!-- ALT ALAN 1: AYLIK FATURALAR -->
+            <div id="subTab-monthly" class="space-y-3">
+                <div class="flex items-center justify-between px-1">
+                    <p class="text-[11px] text-slate-400">Elektrik, Su, Doğalgaz, İnternet, Kira vb.</p>
+                    <button onclick="openBillModal()" class="bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold flex items-center gap-1 active:scale-95 transition">
+                        <i class="fa-solid fa-plus"></i> Fatura Ekle
+                    </button>
                 </div>
+                <div id="monthlyBillsList" class="space-y-2"></div>
             </div>
 
-            <div id="subAreaYillik" class="hidden space-y-3">
-                <div class="bg-card border border-slate-800 rounded-3xl p-4 space-y-3">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-xs font-black text-white uppercase tracking-wider">Yıllık Vergiler</h3>
-                            <p class="text-[10px] text-slate-400">MTV, Emlak vb.</p>
-                        </div>
-                        <button onclick="openBillModal('yillik')" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 px-2.5 py-1.5 rounded-xl text-[11px] font-black"><i class="fa-solid fa-plus mr-1"></i>Ekle</button>
-                    </div>
-                    <div id="yearlyTaxesList" class="space-y-2"></div>
+            <!-- ALT ALAN 2: YILLIK VERGİLER -->
+            <div id="subTab-yearly" class="hidden space-y-3">
+                <div class="bg-card border border-slate-800 rounded-3xl p-3.5 space-y-2">
+                    <h3 class="text-xs font-black text-amber-300 uppercase">Sabit Takvimli Vergi Dönemleri</h3>
+                    <p class="text-[11px] text-slate-400">MTV (Ocak & Temmuz), Emlak Vergisi (Mayıs & Kasım), Kira Gelir Vergisi (Mart & Temmuz). İlgili aylara otomatik yansıtılır.</p>
                 </div>
+                <div id="yearlyTaxesList" class="space-y-2"></div>
             </div>
+
         </section>
 
-        <!-- SEKME 4: 🧠 DANIŞMAN & GELİR -->
+
+        <!-- =================================================================== -->
+        <!-- SEKME 4: DANIŞMAN & VADELİ -->
+        <!-- =================================================================== -->
         <section id="tab-danisman" class="hidden space-y-3.5">
-            <div class="bg-gradient-to-br from-indigo-950/70 via-card to-slate-950 border border-indigo-500/40 rounded-3xl p-4 space-y-3 shadow-xl">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-10 h-10 rounded-2xl bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 flex items-center justify-center text-base shrink-0">
-                        <i class="fa-solid fa-wallet"></i>
-                    </div>
+
+            <!-- MAAŞ / GELİR VE KALAN NET NAKİT GÖSTERGESİ -->
+            <div class="bg-gradient-to-br from-indigo-950/60 via-card to-slate-950 border border-indigo-500/30 rounded-3xl p-4 space-y-3 shadow-xl">
+                <div class="flex items-center justify-between">
                     <div>
-                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-400">Aylık Bütçe & Net Bakiye</span>
-                        <h2 class="text-sm font-black text-white">Maaş / Gelir ve Gider Analizi</h2>
+                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-400">Aylık Bütçe Dengesi</span>
+                        <h2 class="text-sm font-black text-white">Maaş & Kalan Serbest Bakiye</h2>
+                    </div>
+                    <div class="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-xs">
+                        <i class="fa-solid fa-scale-balanced"></i>
                     </div>
                 </div>
 
-                <div class="space-y-2.5">
+                <div class="space-y-2">
                     <div>
-                        <label class="text-[10px] text-emerald-400 font-bold block mb-1">Aylık Toplam Gelir / Maaş (₺)</label>
-                        <input type="number" id="advSalaryInput" value="75000" oninput="runSmartAdvisor()" class="w-full bg-amoled border border-emerald-500/40 rounded-2xl px-3.5 py-2 text-base font-black text-emerald-400 focus:outline-none">
+                        <label class="text-xs text-slate-300 font-bold block mb-1">Aylık Toplam Net Gelir / Maaş (₺)</label>
+                        <input type="number" id="monthlyIncomeInput" value="85000" oninput="calculateAdvisorAndBalance()" class="w-full bg-amoled border border-indigo-500/40 rounded-2xl px-3.5 py-2.5 text-base font-black text-emerald-400 focus:outline-none">
                     </div>
-                    <div>
-                        <label class="text-[10px] text-slate-300 font-bold block mb-1">Toplu Para (Yatırım/Tasarruf) (₺)</label>
-                        <input type="number" id="advCashInput" value="500000" oninput="runSmartAdvisor()" class="w-full bg-amoled border border-indigo-500/40 rounded-2xl px-3.5 py-2 text-base font-black text-indigo-300 focus:outline-none">
+
+                    <div class="grid grid-cols-2 gap-2 pt-1 text-center">
+                        <div class="bg-amoled/90 border border-slate-800 rounded-2xl p-2.5">
+                            <span class="text-[10px] text-rose-300 font-bold block">Bu Ay Toplam Gider</span>
+                            <span id="advTotalExpenseThisMonth" class="text-sm font-black text-rose-400 mt-0.5 block">0 ₺</span>
+                        </div>
+                        <div class="bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-2.5">
+                            <span class="text-[10px] text-emerald-300 font-bold block">Cepte Kalan Net Para</span>
+                            <span id="advNetRemainingCash" class="text-sm font-black text-emerald-400 mt-0.5 block">0 ₺</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div id="advisorOutputContainer" class="space-y-3"></div>
+            <!-- TOPLU PARA GELDİ: ERKEN KAPATMA MI, VADELİ MEVDUAT MI? -->
+            <div class="bg-card border border-slate-800 rounded-3xl p-4 space-y-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center text-xs">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-black text-white">Akıllı Karar Motoru (Toplu Para Karşılaştırma)</h3>
+                        <p class="text-[10px] text-slate-400">Erken kapama faiz kazancı ile net vadeli getiriyi kıyaslar.</p>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center text-xs">
+                        <label class="text-slate-300 font-bold">Toplu Para Tutarı (₺)</label>
+                        <div class="flex gap-1">
+                            <button onclick="setAdvisorLumpSum(100000)" class="text-[10px] bg-slate-800 px-2 py-0.5 rounded-lg text-slate-300 font-bold">100B</button>
+                            <button onclick="setAdvisorLumpSum(300000)" class="text-[10px] bg-slate-800 px-2 py-0.5 rounded-lg text-slate-300 font-bold">300B</button>
+                            <button onclick="setAdvisorLumpSum(500000)" class="text-[10px] bg-indigo-600/40 border border-indigo-500/40 px-2 py-0.5 rounded-lg text-indigo-200 font-bold">500B</button>
+                        </div>
+                    </div>
+                    <input type="number" id="advLumpSumInput" value="300000" oninput="calculateAdvisorAndBalance()" class="w-full bg-amoled border border-slate-700 rounded-2xl px-3.5 py-2 text-sm font-black text-white focus:outline-none">
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-[10px] text-slate-400 font-bold block mb-1">Mevduat Faizi (%)</label>
+                            <input type="number" step="0.5" id="advDepositRate" value="48" oninput="calculateAdvisorAndBalance()" class="w-full bg-amoled border border-slate-800 rounded-xl px-2.5 py-2 text-xs font-bold text-white">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-400 font-bold block mb-1">Stopaj Kesintisi</label>
+                            <select id="advStopajRate" onchange="calculateAdvisorAndBalance()" class="w-full bg-amoled border border-slate-800 rounded-xl px-2 py-2 text-xs font-bold text-white">
+                                <option value="15">%15 (Kısa Vade)</option>
+                                <option value="10" selected>%10 (Standart)</option>
+                                <option value="7.5">%7.5 (Uzun Vade)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="advisorResultsBox" class="space-y-2 pt-1"></div>
+            </div>
+
+            <!-- VADELİ MEVDUAT HESAPLAMA ARACI -->
+            <div class="bg-card border border-slate-800 rounded-3xl p-4 space-y-3">
+                <h3 class="text-xs font-black text-white flex items-center gap-1.5">
+                    <i class="fa-solid fa-percent text-emerald-400"></i>
+                    <span>Hızlı Vadeli Mevduat Hesaplayıcı</span>
+                </h3>
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="text-[10px] text-slate-400 block mb-1">Tutar (₺)</label>
+                        <input type="number" id="calcDepPrincipal" value="100000" oninput="calculateSimpleDeposit()" class="w-full bg-amoled border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs font-bold text-white">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-slate-400 block mb-1">Faiz (%)</label>
+                        <input type="number" step="0.5" id="calcDepRate" value="48" oninput="calculateSimpleDeposit()" class="w-full bg-amoled border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs font-bold text-emerald-400">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-slate-400 block mb-1">Vade (Gün)</label>
+                        <input type="number" id="calcDepDays" value="32" oninput="calculateSimpleDeposit()" class="w-full bg-amoled border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs font-bold text-white">
+                    </div>
+                </div>
+                <div class="bg-amoled/80 border border-slate-800 rounded-2xl p-2.5 flex items-center justify-between text-xs">
+                    <span class="text-slate-300">Net Getiri:</span>
+                    <span id="calcDepNetReturn" class="font-black text-emerald-400">+0 ₺</span>
+                </div>
+            </div>
+
         </section>
 
-        <!-- SEKME 5: 🔐 ŞİFRELER -->
+
+        <!-- =================================================================== -->
+        <!-- SEKME 5: PIN KORUMALI ŞİFRELER & GÜVENLİ NOTLAR -->
+        <!-- =================================================================== -->
         <section id="tab-sifreler" class="hidden space-y-3.5">
+
+            <!-- PIN KİLİT EKRANI -->
             <div id="pinLockScreen" class="bg-card border border-slate-800 rounded-3xl p-6 text-center space-y-4">
-                <div class="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center text-xl mx-auto">
-                    <i class="fa-solid fa-shield-halved"></i>
+                <div class="w-14 h-14 rounded-3xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-2xl mx-auto shadow-lg shadow-emerald-500/20">
+                    <i class="fa-solid fa-lock"></i>
                 </div>
                 <div>
-                    <h2 class="text-sm font-black text-white">Şifreler Sekmesi Kilitli</h2>
-                    <p class="text-[10px] text-slate-400 mt-0.5">4 haneli PIN şifrenizi girin (Varsayılan: 1234)</p>
+                    <h2 class="text-base font-black text-white">Şifre & Not Kasası Kilitli</h2>
+                    <p class="text-xs text-slate-400 mt-1">Lütfen 4 haneli güvenlik PIN kodunu girin.</p>
+                    <p class="text-[10px] text-slate-500 mt-0.5">(Varsayılan PIN: 1234)</p>
                 </div>
-                <input type="password" id="pinInputCode" maxlength="4" placeholder="••••" class="w-36 bg-amoled border border-slate-800 rounded-2xl px-4 py-2.5 text-center text-lg font-mono font-black text-emerald-400 tracking-widest mx-auto focus:outline-none">
-                <div>
-                    <button onclick="verifyPinCode()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black px-6 py-2.5 rounded-xl text-xs shadow-lg active:scale-95 transition">Kilidi Aç</button>
+                <div class="flex justify-center gap-2 max-w-[200px] mx-auto">
+                    <input type="password" maxlength="4" id="vaultPinInput" onkeyup="checkPinEntry(this.value)" placeholder="••••" class="w-full text-center tracking-[0.5em] text-xl font-black bg-amoled border border-slate-700 rounded-2xl py-2.5 text-emerald-400 focus:outline-none focus:border-emerald-500">
                 </div>
+                <button onclick="unlockVault()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black py-2.5 rounded-2xl text-xs active:scale-95 transition">
+                    Kilidi Aç
+                </button>
             </div>
 
-            <div id="vaultContentArea" class="hidden space-y-3.5">
-                <div class="bg-card border border-slate-800 rounded-3xl p-4 flex items-center justify-between gap-3">
-                    <div>
-                        <span class="text-[10px] font-extrabold text-amber-400 uppercase">Güvenlik Ayarı</span>
-                        <h3 class="text-xs font-black text-white">Şifreler PIN Kodunu Değiştir</h3>
-                    </div>
-                    <button onclick="openChangePinModal()" class="bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 px-3 py-2.5 rounded-2xl text-xs font-extrabold shrink-0 active:scale-95 transition"><i class="fa-solid fa-key mr-1"></i>PIN Değiştir</button>
-                </div>
+            <!-- KİLİT AÇILDIKTAN SONRAKİ KASA EKRANI -->
+            <div id="vaultUnlockedContent" class="hidden space-y-3.5">
 
+                <!-- 1. BANKA ŞİFRELERİ BÖLÜMÜ -->
                 <div class="bg-card border border-slate-800 rounded-3xl p-3.5 space-y-3">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h2 class="text-sm font-black text-white flex items-center gap-1.5"><i class="fa-solid fa-key text-emerald-400"></i><span>Paylaşıma Uygun Şifre / Not Kasası</span></h2>
-                            <p class="text-[10px] text-slate-400">Tamamen boş gelir.</p>
+                            <h2 class="text-sm font-black text-white flex items-center gap-1.5">
+                                <i class="fa-solid fa-key text-emerald-400"></i>
+                                <span>Banka Şifreleri & PIN'ler</span>
+                            </h2>
+                            <p class="text-[10px] text-slate-400">Sadece cihazınızda tutulur.</p>
                         </div>
-                        <div class="flex gap-1.5">
-                            <button onclick="toggleAllPins()" id="togglePinsBtn" class="bg-slate-900 hover:bg-slate-800 text-slate-200 px-2.5 py-1.5 rounded-xl text-[11px] font-bold border border-slate-800"><i class="fa-solid fa-eye mr-1"></i>Göster</button>
-                            <button onclick="openVaultModal()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 px-2.5 py-1.5 rounded-xl text-[11px] font-black"><i class="fa-solid fa-plus mr-1"></i>Ekle</button>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="openChangePinModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-2.5 py-1.5 rounded-xl text-[11px] font-bold">
+                                PIN Değiştir
+                            </button>
+                            <button onclick="openPasswordModal()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 px-2.5 py-1.5 rounded-xl text-[11px] font-black">
+                                + Şifre Ekle
+                            </button>
                         </div>
                     </div>
-                    <div id="vaultItemsList" class="space-y-2"></div>
+                    <div id="vaultPasswordsList" class="space-y-2"></div>
                 </div>
 
-                <div class="bg-card border border-slate-800 rounded-3xl p-4 space-y-2.5">
-                    <h3 class="text-xs font-black text-white uppercase tracking-wider">Temiz Başlangıç</h3>
-                    <button onclick="resetAllDataCompletely()" class="w-full bg-rose-500/15 text-rose-400 border border-rose-500/30 py-3 rounded-xl text-xs font-black flex items-center justify-center gap-2"><i class="fa-solid fa-rotate-left"></i> Tüm Verileri Sıfırla</button>
+                <!-- 2. GÜVENLİ NOTLAR BÖLÜMÜ (YENİ!) -->
+                <div class="bg-card border border-slate-800 rounded-3xl p-3.5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-sm font-black text-white flex items-center gap-1.5">
+                                <i class="fa-solid fa-note-sticky text-amber-400"></i>
+                                <span>Güvenli Notlar</span>
+                            </h2>
+                            <p class="text-[10px] text-slate-400">IBAN, müşteri numarası, kart limitleri vb.</p>
+                        </div>
+                        <button onclick="openNoteModal()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-2.5 py-1.5 rounded-xl text-[11px] font-black">
+                            + Not Ekle
+                        </button>
+                    </div>
+                    <div id="vaultNotesList" class="space-y-2"></div>
                 </div>
+
+                <!-- VERİLERİ SIFIRLAMA VE YEDEKLEME -->
+                <div class="bg-card border border-slate-800 rounded-3xl p-4 space-y-3">
+                    <h3 class="text-xs font-black text-white uppercase tracking-wider">Veri Yönetimi & Paylaşım</h3>
+                    <p class="text-[11px] text-slate-400">Arkadaşına göndermeden önce veya yeni başlamak istediğinde tek tuşla tüm verileri sıfırlayabilirsin.</p>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="exportDataJSON()" class="bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 py-2.5 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 active:scale-95">
+                            <i class="fa-solid fa-download"></i> Yedek İndir (.json)
+                        </button>
+                        <label class="bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 py-2.5 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer active:scale-95">
+                            <i class="fa-solid fa-upload"></i> Yedek Yükle
+                            <input type="file" accept=".json" onchange="importDataJSON(event)" class="hidden">
+                        </label>
+                    </div>
+
+                    <button onclick="resetAllAppData()" class="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 py-2.5 rounded-xl text-xs font-black active:scale-95 transition">
+                        <i class="fa-solid fa-trash-can mr-1"></i> Tüm Verileri Sıfırla (Tertemiz Yap)
+                    </button>
+                </div>
+
             </div>
+
         </section>
 
     </main>
 
-    <!-- ALT GEZİNME ÇUBUĞU -->
-    <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-amoled/95 backdrop-blur-xl border-t border-slate-900 px-1.5 py-1.5 z-30">
+    <!-- ALT MENÜ (5 BAĞIMSIZ SEKME) -->
+    <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-amoled/95 backdrop-blur-xl border-t border-slate-800/90 px-1 py-1.5 z-30">
         <div class="grid grid-cols-5 gap-1">
-            <button onclick="switchTab('genel')" id="nav-genel" class="flex flex-col items-center justify-center py-2 rounded-2xl text-emerald-400 bg-emerald-500/15 font-extrabold transition"><i class="fa-solid fa-chart-pie text-sm mb-1"></i><span class="text-[10px]">Genel Borç</span></button>
-            <button onclick="switchTab('krediler')" id="nav-krediler" class="flex flex-col items-center justify-center py-2 rounded-2xl text-slate-400 hover:text-slate-200 font-semibold transition"><i class="fa-solid fa-credit-card text-sm mb-1"></i><span class="text-[10px]">Kredilerim</span></button>
-            <button onclick="switchTab('fatura')" id="nav-fatura" class="flex flex-col items-center justify-center py-2 rounded-2xl text-slate-400 hover:text-slate-200 font-semibold transition"><i class="fa-solid fa-file-invoice-dollar text-sm mb-1"></i><span class="text-[10px]">Fatura & Vergi</span></button>
-            <button onclick="switchTab('danisman')" id="nav-danisman" class="flex flex-col items-center justify-center py-2 rounded-2xl text-slate-400 hover:text-slate-200 font-semibold transition"><i class="fa-solid fa-brain text-sm mb-1"></i><span class="text-[10px]">Danışman</span></button>
-            <button onclick="switchTab('sifreler')" id="nav-sifreler" class="flex flex-col items-center justify-center py-2 rounded-2xl text-slate-400 hover:text-slate-200 font-semibold transition"><i class="fa-solid fa-key text-sm mb-1"></i><span class="text-[10px]">Şifreler</span></button>
+            <button onclick="switchTab('genel')" id="nav-genel" class="flex flex-col items-center justify-center py-2 rounded-2xl text-emerald-400 bg-emerald-500/15 font-extrabold transition">
+                <i class="fa-solid fa-chart-pie text-sm mb-1"></i>
+                <span class="text-[10px]">Genel Borç</span>
+            </button>
+            <button onclick="switchTab('krediler')" id="nav-krediler" class="flex flex-col items-center justify-center py-2 rounded-2xl text-slate-400 hover:text-slate-200 font-semibold transition">
+                <i class="fa-solid fa-credit-card text-sm mb-1"></i>
+                <span class="text-[10px]">Kredilerim</span>
+            </button>
+            <button onclick="switchTab('fatura')" id="nav-fatura" class="flex flex-col items-center justify-center py-2 rounded-2xl text-slate-400 hover:text-slate-200 font-semibold transition">
+                <i class="fa-solid fa-receipt text-sm mb-1"></i>
+                <span class="text-[10px]">Fatura & Vergi</span>
+            </button>
+            <button onclick="switchTab('danisman')" id="nav-danisman" class="flex flex-col items-center justify-center py-2 rounded-2xl text-slate-400 hover:text-slate-200 font-semibold transition">
+                <i class="fa-solid fa-wand-magic-sparkles text-sm mb-1"></i>
+                <span class="text-[10px]">Danışman</span>
+            </button>
+            <button onclick="switchTab('sifreler')" id="nav-sifreler" class="flex flex-col items-center justify-center py-2 rounded-2xl text-slate-400 hover:text-slate-200 font-semibold transition">
+                <i class="fa-solid fa-lock text-sm mb-1"></i>
+                <span class="text-[10px]">Şifreler</span>
+            </button>
         </div>
     </nav>
 
-    <!-- MODAL: KREDİ / TNA EKLE -->
+
+    <!-- =================================================================== -->
+    <!-- MODAL 1: KREDİ & TNA EKLE / DÜZENLE -->
+    <!-- =================================================================== -->
     <div id="loanModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-card border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-3xl w-full max-w-md p-4 space-y-3 max-h-[92vh] overflow-y-auto">
             <div class="flex justify-between items-center pb-2 border-b border-slate-800">
                 <h3 id="loanModalTitle" class="text-sm font-black text-white">Kredi / Nakit Avans Ekle</h3>
-                <button onclick="closeLoanModal()" class="w-8 h-8 rounded-full bg-slate-900 text-slate-400 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                <button onclick="closeLoanModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
+
             <input type="hidden" id="editLoanId">
+
+            <!-- TÜR SEÇİMİ: KREDİ VEYA TNA -->
             <div class="grid grid-cols-2 gap-2">
-                <button type="button" onclick="setModalType('kredi')" id="mType-kredi" class="py-2 rounded-xl border text-xs font-extrabold flex items-center justify-center gap-1.5 bg-purple-600/20 border-purple-500 text-purple-300"><i class="fa-solid fa-building-columns"></i> Kredi</button>
-                <button type="button" onclick="setModalType('tna')" id="mType-tna" class="py-2 rounded-xl border text-xs font-extrabold flex items-center justify-center gap-1.5 bg-amoled border-slate-900 text-slate-400"><i class="fa-solid fa-credit-card"></i> Nakit Avans (TNA)</button>
+                <button type="button" onclick="setModalType('kredi')" id="mType-kredi" class="py-2 rounded-xl border text-xs font-extrabold flex items-center justify-center gap-1.5 bg-purple-600/20 border-purple-500 text-purple-300">
+                    <i class="fa-solid fa-building-columns"></i> Kredi
+                </button>
+                <button type="button" onclick="setModalType('tna')" id="mType-tna" class="py-2 rounded-xl border text-xs font-extrabold flex items-center justify-center gap-1.5 bg-amoled border-slate-800 text-slate-400">
+                    <i class="fa-solid fa-credit-card"></i> TNA (Nakit Avans)
+                </button>
             </div>
+
+            <!-- BANKA SEÇİMİ (POPÜLER BANKALAR) -->
             <div class="grid grid-cols-2 gap-2">
                 <div>
-                    <label class="text-[10px] text-slate-400 font-bold block mb-1">Banka Seç</label>
-                    <select id="mBank" class="w-full bg-amoled border border-slate-900 rounded-xl px-3 py-2 text-xs font-bold text-white">
-                        <option value="Enpara">Enpara</option>
+                    <label class="text-[10px] text-slate-400 font-bold block mb-1">Banka Adı</label>
+                    <select id="mBankSelect" class="w-full bg-amoled border border-slate-800 rounded-xl px-2.5 py-2 text-xs font-bold text-white focus:outline-none focus:border-emerald-500">
+                        <option value="Enpara">Enpara.com</option>
                         <option value="Akbank">Akbank</option>
                         <option value="Yapı Kredi">Yapı Kredi</option>
-                        <option value="QNB">QNB</option>
-                        <option value="Garanti BBVA">Garanti BBVA</option>
                         <option value="Ziraat Bankası">Ziraat Bankası</option>
-                        <option value="TEB">TEB</option>
+                        <option value="Garanti BBVA">Garanti BBVA</option>
                         <option value="İş Bankası">İş Bankası</option>
+                        <option value="QNB Finansbank">QNB Finansbank</option>
+                        <option value="TEB">TEB</option>
                         <option value="VakıfBank">VakıfBank</option>
-                        <option value="DenizBank">DenizBank</option>
                         <option value="Halkbank">Halkbank</option>
+                        <option value="DenizBank">DenizBank</option>
+                        <option value="ING">ING</option>
+                        <option value="Diğer">Diğer</option>
                     </select>
                 </div>
-                <div><label class="text-[10px] text-slate-400 font-bold block mb-1">Not / Etiket</label><input type="text" id="mNote" placeholder="İhtiyaç Kredisi" class="w-full bg-amoled border border-slate-900 rounded-xl px-3 py-2 text-xs text-white"></div>
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold block mb-1">Açıklama / Not</label>
+                    <input type="text" id="mNote" placeholder="Örn: İhtiyaç, Araba..." class="w-full bg-amoled border border-slate-800 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                </div>
             </div>
+
+            <!-- ÇEKİLEN ANA PARA & AYLIK TAKSİT -->
             <div class="grid grid-cols-2 gap-2">
-                <div><label class="text-[10px] text-emerald-400 font-extrabold block mb-1">Çekilen Ana Para (₺)</label><input type="number" id="mInitialPrincipal" placeholder="50000" class="w-full bg-amoled border border-emerald-500/40 rounded-xl px-3 py-2 text-xs font-extrabold text-emerald-300"></div>
-                <div><label class="text-[10px] text-white font-extrabold block mb-1">Aylık Taksit (₺)</label><input type="number" id="mMonthlyAmount" placeholder="15000" class="w-full bg-amoled border border-slate-800 rounded-xl px-3 py-2 text-xs font-extrabold text-white"></div>
+                <div>
+                    <label class="text-[10px] text-emerald-400 font-bold block mb-1">Çekilen Ana Para (₺)</label>
+                    <input type="number" step="any" id="mInitialPrincipal" oninput="updateLoanModalCalculations()" placeholder="Örn: 50000" class="w-full bg-amoled border border-emerald-500/40 rounded-xl px-3 py-2 text-xs font-extrabold text-emerald-300">
+                </div>
+                <div>
+                    <label id="mAmountLabel" class="text-[10px] text-white font-bold block mb-1">Aylık Taksit Tutarı (₺)</label>
+                    <input type="number" step="any" id="mMonthlyAmount" oninput="updateLoanModalCalculations()" placeholder="Örn: 5200" class="w-full bg-amoled border border-slate-700 rounded-xl px-3 py-2 text-xs font-extrabold text-white">
+                </div>
             </div>
+
+            <!-- TNA ÖZEL SINIRLAMA (MAKS 3 TAKSİT VEYA TEK ÇEKİM) -->
+            <div id="tnaInstallmentLimitBox" class="hidden bg-amber-950/30 border border-amber-500/40 rounded-2xl p-2.5 space-y-1.5">
+                <span class="text-[10px] font-extrabold text-amber-300 uppercase">TNA Vade Sınırı (BDDK Kuralı - Maks 3 Ay)</span>
+                <div class="grid grid-cols-3 gap-1.5">
+                    <button type="button" onclick="setTnaVadePreset(1)" id="tnaBtn-1" class="py-1.5 px-2 rounded-xl border text-[11px] font-bold bg-amoled border-slate-800 text-slate-300">1 Ay (Tek Çekim)</button>
+                    <button type="button" onclick="setTnaVadePreset(2)" id="tnaBtn-2" class="py-1.5 px-2 rounded-xl border text-[11px] font-bold bg-amoled border-slate-800 text-slate-300">2 Taksit</button>
+                    <button type="button" onclick="setTnaVadePreset(3)" id="tnaBtn-3" class="py-1.5 px-2 rounded-xl border text-[11px] font-bold bg-amber-500/20 border-amber-500 text-amber-300">3 Taksit (Maks)</button>
+                </div>
+            </div>
+
+            <!-- ERTELEME SEÇENEĞİ (3 AYA KADAR ERTELEME) -->
+            <div class="bg-amoled/80 border border-slate-800 rounded-2xl p-2.5 space-y-2">
+                <label class="text-[10px] text-amber-300 font-extrabold block">Erteleme Var mı? (Taksitler kaç ay sonra başlayacak?)</label>
+                <div class="grid grid-cols-4 gap-1">
+                    <button type="button" onclick="setDeferralPreset(0)" id="defBtn-0" class="py-1.5 rounded-xl border text-[10px] font-bold bg-emerald-600/20 border-emerald-500 text-emerald-300">Hemen Başladı</button>
+                    <button type="button" onclick="setDeferralPreset(1)" id="defBtn-1" class="py-1.5 rounded-xl border text-[10px] font-bold bg-card border-slate-800 text-slate-400">1 Ay Ertelendi</button>
+                    <button type="button" onclick="setDeferralPreset(2)" id="defBtn-2" class="py-1.5 rounded-xl border text-[10px] font-bold bg-card border-slate-800 text-slate-400">2 Ay Ertelendi</button>
+                    <button type="button" onclick="setDeferralPreset(3)" id="defBtn-3" class="py-1.5 rounded-xl border text-[10px] font-bold bg-card border-slate-800 text-slate-400">3 Ay Ertelendi</button>
+                </div>
+            </div>
+
+            <!-- VADE, KAÇINCI TAKSİT VE ÖDEME GÜNÜ -->
             <div class="grid grid-cols-3 gap-2">
-                <div><label class="text-[10px] text-slate-400 font-bold block mb-1">Vade (Ay)</label><input type="number" id="mTotalMonths" value="12" class="w-full bg-amoled border border-slate-900 rounded-xl px-2 py-2 text-xs font-bold text-white"></div>
-                <div><label class="text-[10px] text-slate-400 font-bold block mb-1">Kaçıncı Taksit?</label><input type="number" id="mCurrentMonth" value="1" class="w-full bg-amoled border border-slate-900 rounded-xl px-2 py-2 text-xs font-bold text-amber-300"></div>
-                <div><label class="text-[10px] text-slate-400 font-bold block mb-1">Ödeme Günü</label><input type="number" min="1" max="31" id="mDay" value="15" class="w-full bg-amoled border border-slate-900 rounded-xl px-2 py-2 text-xs font-bold text-white"></div>
-            </div>
-            <div class="grid grid-cols-2 gap-2">
                 <div>
-                    <label class="text-[10px] text-slate-400 font-bold block mb-1">Aylık Faiz Oranı (%)</label>
-                    <input type="number" step="0.01" id="mRate" value="4.29" class="w-full bg-amoled border border-slate-900 rounded-xl px-3 py-2 text-xs font-bold text-emerald-400">
+                    <label id="mTotalMonthsLabel" class="text-[10px] text-slate-400 font-bold block mb-1">Toplam Vade</label>
+                    <input type="number" min="1" max="120" id="mTotalMonths" oninput="onTotalMonthsInput()" class="w-full bg-amoled border border-slate-800 rounded-xl px-2.5 py-2 text-xs font-bold text-white">
                 </div>
                 <div>
-                    <label class="text-[10px] text-amber-300 font-bold block mb-1">Erteleme</label>
-                    <select id="mDeferral" class="w-full bg-amoled border border-slate-900 rounded-xl px-3 py-2 text-xs font-bold text-amber-300">
-                        <option value="0">Ertelemesiz</option>
-                        <option value="1">1 Ay Erteleme</option>
-                        <option value="2">2 Ay Erteleme</option>
-                        <option value="3">3 Ay Erteleme</option>
-                    </select>
+                    <label class="text-[10px] text-slate-400 font-bold block mb-1">Kaçıncı Aydasın?</label>
+                    <input type="number" min="1" max="120" id="mCurrentMonth" oninput="updateLoanModalCalculations()" class="w-full bg-amoled border border-slate-800 rounded-xl px-2.5 py-2 text-xs font-bold text-amber-300">
+                </div>
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold block mb-1">Ödeme Günü (1-31)</label>
+                    <input type="number" min="1" max="31" id="mDay" oninput="updateLoanModalCalculations()" class="w-full bg-amoled border border-slate-800 rounded-xl px-2.5 py-2 text-xs font-bold text-white">
                 </div>
             </div>
+
+            <!-- AYLIK AKDİ FAİZ ORANI (%) -->
+            <div class="bg-amoled/80 border border-slate-800 rounded-2xl p-2.5 space-y-2">
+                <div class="flex items-center justify-between">
+                    <label class="text-[10px] text-slate-300 font-bold">Aylık Akdi Faiz Oranı (%)</label>
+                    <input type="number" step="0.01" id="mRate" oninput="updateLoanModalCalculations()" class="w-20 bg-card border border-slate-700 rounded-lg px-2 py-1 text-xs font-black text-emerald-400 text-right">
+                </div>
+                <div class="grid grid-cols-4 gap-1">
+                    <button type="button" onclick="setQuickRate(2.99)" class="text-[10px] bg-card border border-slate-800 rounded-lg py-1 text-slate-300 font-bold">%2.99</button>
+                    <button type="button" onclick="setQuickRate(3.99)" class="text-[10px] bg-card border border-slate-800 rounded-lg py-1 text-slate-300 font-bold">%3.99</button>
+                    <button type="button" onclick="setQuickRate(4.49)" class="text-[10px] bg-card border border-slate-800 rounded-lg py-1 text-slate-300 font-bold">%4.49</button>
+                    <button type="button" onclick="setQuickRate(5.00)" class="text-[10px] bg-card border border-slate-800 rounded-lg py-1 text-rose-300 font-bold">%5.00</button>
+                </div>
+            </div>
+
+            <!-- ANLIK ERKEN KAPAMA VE AMORTİSMAN ÖNİZLEMESİ -->
+            <div class="bg-emerald-950/25 border border-emerald-500/30 rounded-2xl p-3 space-y-1.5 text-xs">
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Kalan Taksit / Durum:</span>
+                    <span id="prevRemStatus" class="font-bold text-white">0 Taksit</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Kalan Toplam Brüt Borç:</span>
+                    <span id="prevGross" class="font-bold text-rose-400">0 ₺</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-emerald-300 font-bold">Gerçek Erken Kapama Tutarı:</span>
+                    <span id="prevEarlyPayoff" class="font-black text-emerald-400">0 ₺</span>
+                </div>
+                <div class="flex justify-between text-[11px] pt-1 border-t border-slate-800">
+                    <span class="text-indigo-300">Silinecek Faiz Kazancı:</span>
+                    <span id="prevSavedInterest" class="font-bold text-indigo-300">0 ₺</span>
+                </div>
+            </div>
+
             <div class="flex gap-2 pt-1">
-                <button type="button" id="deleteLoanModalBtn" onclick="deleteLoanFromModal()" class="hidden bg-rose-500/15 text-rose-400 border border-rose-500/30 px-4 py-2.5 rounded-xl text-xs font-extrabold"><i class="fa-solid fa-trash"></i></button>
-                <button type="button" onclick="saveLoanFromModal()" class="flex-1 bg-emerald-600 text-slate-950 font-black py-2.5 rounded-xl text-xs shadow-lg">Kaydet</button>
+                <button type="button" id="deleteLoanBtn" onclick="deleteCurrentLoan()" class="hidden bg-rose-500/15 text-rose-400 border border-rose-500/30 px-4 py-2.5 rounded-xl text-xs font-black">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+                <button type="button" onclick="saveLoanModalData()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black py-2.5 rounded-xl text-xs">
+                    Kaydet
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL: FATURA / KİRA / VERGİ EKLE -->
+
+    <!-- =================================================================== -->
+    <!-- MODAL 2: AYLIK FATURA EKLE / DÜZENLE -->
+    <!-- =================================================================== -->
     <div id="billModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-card border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-3xl w-full max-w-md p-4 space-y-3">
             <div class="flex justify-between items-center pb-2 border-b border-slate-800">
-                <h3 class="text-sm font-black text-white">Fatura / Kira / Vergi Ekle</h3>
-                <button onclick="closeBillModal()" class="w-8 h-8 rounded-full bg-slate-900 text-slate-400 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                <h3 id="billModalTitle" class="text-sm font-black text-white">Aylık Fatura Ekle</h3>
+                <button onclick="closeBillModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
-            <input type="hidden" id="editBillCat">
-            <div><label class="text-[10px] text-slate-400 font-bold block mb-1">Başlık (Kira, Elektrik, MTV vb.)</label><input type="text" id="bTitle" placeholder="Kira" class="w-full bg-amoled border border-slate-900 rounded-xl px-3 py-2 text-xs font-bold text-white"></div>
+            <input type="hidden" id="editBillId">
+            <div>
+                <label class="text-[10px] text-slate-400 font-bold block mb-1">Fatura Adı / Türü</label>
+                <input type="text" id="billNameInput" placeholder="Örn: Ev Kirası, Doğalgaz, Türk Telekom..." class="w-full bg-amoled border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
+            </div>
             <div class="grid grid-cols-2 gap-2">
-                <div><label class="text-[10px] text-slate-400 font-bold block mb-1">Tutar (₺)</label><input type="number" id="bAmount" placeholder="12000" class="w-full bg-amoled border border-slate-900 rounded-xl px-3 py-2 text-xs font-bold text-emerald-400"></div>
-                <div><label class="text-[10px] text-slate-400 font-bold block mb-1">Ayın Kaçında?</label><input type="number" min="1" max="31" id="bDay" value="10" class="w-full bg-amoled border border-slate-900 rounded-xl px-3 py-2 text-xs font-bold text-white"></div>
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold block mb-1">Aylık Tutar (₺) (Zorunlu Değil)</label>
+                    <input type="number" step="any" id="billAmountInput" placeholder="Değişkense boş bırak" class="w-full bg-amoled border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-white">
+                </div>
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold block mb-1">Ödeme Günü (1-31)</label>
+                    <input type="number" min="1" max="31" id="billDayInput" value="15" class="w-full bg-amoled border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-white">
+                </div>
             </div>
-            <button onclick="saveBillFromModal()" class="w-full bg-emerald-600 text-slate-950 font-black py-2.5 rounded-xl text-xs shadow-lg">Kaydet</button>
-        </div>
-    </div>
-
-    <!-- MODAL: PIN DEĞİŞTİR -->
-    <div id="changePinModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden items-center justify-center p-4">
-        <div class="bg-card border border-slate-800 rounded-3xl w-full max-w-md p-5 space-y-3.5">
-            <div class="flex justify-between items-center pb-2 border-b border-slate-800">
-                <h3 class="text-sm font-black text-white flex items-center gap-1.5"><i class="fa-solid fa-key text-amber-400"></i> Şifreler PIN Kodunu Değiştir</h3>
-                <button onclick="closeChangePinModal()" class="w-8 h-8 rounded-full bg-slate-900 text-slate-400 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="space-y-3">
-                <div><label class="text-xs text-slate-400 block mb-1">Mevcut PIN</label><input type="password" id="oldPinInput" maxlength="4" placeholder="••••" class="w-full bg-amoled border border-slate-900 rounded-xl px-3.5 py-2.5 text-xs font-mono font-bold text-white tracking-widest"></div>
-                <div><label class="text-xs text-slate-400 block mb-1">Yeni 4 Haneli PIN</label><input type="password" id="newPinInput1" maxlength="4" placeholder="••••" class="w-full bg-amoled border border-slate-900 rounded-xl px-3.5 py-2.5 text-xs font-mono font-bold text-emerald-400 tracking-widest"></div>
-                <div><label class="text-xs text-slate-400 block mb-1">Yeni PIN (Tekrar Teyit)</label><input type="password" id="newPinInput2" maxlength="4" placeholder="••••" class="w-full bg-amoled border border-slate-900 rounded-xl px-3.5 py-2.5 text-xs font-mono font-bold text-emerald-400 tracking-widest"></div>
-                <button onclick="saveNewPinCode()" class="w-full bg-emerald-600 text-slate-950 font-black py-2.5 rounded-xl text-xs shadow-lg">PIN Kodunu Güncelle</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL: ŞİFRE EKLE -->
-    <div id="vaultModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-card border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-3xl w-full max-w-md p-5 space-y-3.5">
-            <div class="flex justify-between items-center">
-                <h3 class="text-sm font-black text-white">Şifre / Not Ekle</h3>
-                <button onclick="closeVaultModal()" class="w-8 h-8 rounded-full bg-slate-900 text-slate-400 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <input type="hidden" id="editVaultId">
-            <div><label class="text-xs text-slate-400 block mb-1">Başlık</label><input type="text" id="vBankInput" placeholder="Enpara" class="w-full bg-amoled border border-slate-900 rounded-xl px-3.5 py-2.5 text-xs font-bold text-white"></div>
-            <div><label class="text-xs text-slate-400 block mb-1">Şifre / PIN</label><input type="text" id="vPinInput" placeholder="Şifre" class="w-full bg-amoled border border-slate-900 rounded-xl px-3.5 py-2.5 text-xs font-mono font-bold text-emerald-400"></div>
             <div class="flex gap-2 pt-1">
-                <button id="deleteVaultBtn" onclick="deleteVaultFromModal()" class="hidden bg-rose-500/15 text-rose-400 border border-rose-500/30 px-4 py-2.5 rounded-xl text-xs font-bold"><i class="fa-solid fa-trash"></i></button>
-                <button onclick="saveVaultFromModal()" class="flex-1 bg-emerald-600 text-slate-950 font-black py-2.5 rounded-xl text-xs">Kaydet</button>
+                <button type="button" id="deleteBillBtn" onclick="deleteCurrentBill()" class="hidden bg-rose-500/15 text-rose-400 border border-rose-500/30 px-4 py-2.5 rounded-xl text-xs font-black">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+                <button type="button" onclick="saveBillModalData()" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-black py-2.5 rounded-xl text-xs">
+                    Kaydet
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL: SAYFA REHBERİ -->
-    <div id="pageHelpModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden items-center justify-center p-4">
-        <div class="bg-card border border-slate-800 rounded-3xl w-full max-w-md p-5 space-y-3.5 max-h-[85vh] overflow-y-auto">
+
+    <!-- =================================================================== -->
+    <!-- MODAL 3: YILLIK VERGİ DÜZENLEME MODALI -->
+    <!-- =================================================================== -->
+    <div id="taxModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-card border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-3xl w-full max-w-md p-4 space-y-3">
             <div class="flex justify-between items-center pb-2 border-b border-slate-800">
-                <h3 id="helpModalTitle" class="text-sm font-black text-white flex items-center gap-1.5"><i class="fa-solid fa-circle-question text-emerald-400"></i> Sayfa Rehberi</h3>
-                <button onclick="closePageHelpModal()" class="w-8 h-8 rounded-full bg-slate-900 text-slate-400 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                <h3 id="taxModalTitle" class="text-sm font-black text-white">Vergi Düzenle</h3>
+                <button onclick="closeTaxModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
-            <div id="helpModalContent" class="space-y-3 text-xs text-slate-300 leading-relaxed"></div>
-            <button onclick="closePageHelpModal()" class="w-full bg-emerald-600 text-slate-950 font-black py-2.5 rounded-xl text-xs">Anladım</button>
+            <input type="hidden" id="editTaxId">
+            <div>
+                <label class="text-[10px] text-slate-400 font-bold block mb-1">Vergi Adı</label>
+                <input type="text" id="taxNameInput" disabled class="w-full bg-amoled border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-400 font-bold">
+            </div>
+            <div>
+                <label class="text-[10px] text-slate-400 font-bold block mb-1">Dönem Başı Tutar (₺)</label>
+                <input type="number" step="any" id="taxAmountInput" placeholder="Örn: 2450" class="w-full bg-amoled border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-amber-300">
+            </div>
+            <p class="text-[10px] text-slate-400">Bu vergi takvimdeki ilgili ayların borç ve bar toplamlarına otomatik eklenir.</p>
+            <button type="button" onclick="saveTaxModalData()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2.5 rounded-xl text-xs">
+                Kaydet
+            </button>
         </div>
     </div>
 
+
+    <!-- =================================================================== -->
+    <!-- MODAL 4: ŞİFRE EKLE / DÜZENLE -->
+    <!-- =================================================================== -->
+    <div id="passwordModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-card border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-3xl w-full max-w-md p-4 space-y-3">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+                <h3 id="pwdModalTitle" class="text-sm font-black text-white">Şifre / PIN Ekle</h3>
+                <button onclick="closePasswordModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <input type="hidden" id="editPwdId">
+            <div>
+                <label class="text-[10px] text-slate-400 font-bold block mb-1">Banka / Kurum Adı</label>
+                <input type="text" id="pwdTitleInput" placeholder="Örn: Yapı Kredi, Garanti..." class="w-full bg-amoled border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-white">
+            </div>
+            <div>
+                <label class="text-[10px] text-slate-400 font-bold block mb-1">Mobil Şifre / PIN</label>
+                <input type="text" id="pwdSecretInput" placeholder="Örn: 543443" class="w-full bg-amoled border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono font-bold text-emerald-400">
+            </div>
+            <div class="flex gap-2 pt-1">
+                <button type="button" id="deletePwdBtn" onclick="deleteCurrentPassword()" class="hidden bg-rose-500/15 text-rose-400 border border-rose-500/30 px-4 py-2.5 rounded-xl text-xs font-black">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+                <button type="button" onclick="savePasswordModalData()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black py-2.5 rounded-xl text-xs">
+                    Kaydet
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- =================================================================== -->
+    <!-- MODAL 5: GÜVENLİ NOT EKLE / DÜZENLE (YENİ!) -->
+    <!-- =================================================================== -->
+    <div id="noteModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-card border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-3xl w-full max-w-md p-4 space-y-3">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+                <h3 id="noteModalTitle" class="text-sm font-black text-white">Güvenli Not Ekle</h3>
+                <button onclick="closeNoteModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <input type="hidden" id="editNoteId">
+            <div>
+                <label class="text-[10px] text-slate-400 font-bold block mb-1">Not Başlığı</label>
+                <input type="text" id="noteTitleInput" placeholder="Örn: Kira IBAN'ı, Şirket Vergi No..." class="w-full bg-amoled border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-white">
+            </div>
+            <div>
+                <label class="text-[10px] text-slate-400 font-bold block mb-1">Not İçeriği</label>
+                <textarea id="noteContentInput" rows="3" placeholder="Örn: TR12 0006 1000... veya Müşteri No: 9948271" class="w-full bg-amoled border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"></textarea>
+            </div>
+            <div class="flex gap-2 pt-1">
+                <button type="button" id="deleteNoteBtn" onclick="deleteCurrentNote()" class="hidden bg-rose-500/15 text-rose-400 border border-rose-500/30 px-4 py-2.5 rounded-xl text-xs font-black">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+                <button type="button" onclick="saveNoteModalData()" class="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2.5 rounded-xl text-xs">
+                    Kaydet
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- =================================================================== -->
+    <!-- MODAL 6: 2 AŞAMALI PIN DEĞİŞTİRME MODALI -->
+    <!-- =================================================================== -->
+    <div id="changePinModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-card border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-3xl w-full max-w-md p-5 space-y-3.5">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+                <h3 class="text-sm font-black text-white">Yeni PIN Belirle</h3>
+                <button onclick="closeChangePinModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div>
+                <label class="text-xs text-slate-300 font-bold block mb-1">Yeni 4 Haneli PIN</label>
+                <input type="password" maxlength="4" id="newPin1" placeholder="••••" class="w-full bg-amoled border border-slate-800 rounded-xl px-3 py-2 text-center text-lg font-black tracking-widest text-emerald-400">
+            </div>
+            <div>
+                <label class="text-xs text-slate-300 font-bold block mb-1">Yeni PIN'i Tekrar Girin</label>
+                <input type="password" maxlength="4" id="newPin2" placeholder="••••" class="w-full bg-amoled border border-slate-800 rounded-xl px-3 py-2 text-center text-lg font-black tracking-widest text-emerald-400">
+            </div>
+            <p id="pinMismatchError" class="text-xs text-rose-400 font-bold hidden text-center">Girdiğiniz PIN kodları birbiriyle eşleşmiyor!</p>
+            <button onclick="saveNewPin()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black py-2.5 rounded-xl text-xs">
+                PIN'i Güncelle
+            </button>
+        </div>
+    </div>
+
+
+    <!-- =================================================================== -->
+    <!-- MODAL 7: HER SAYFAYA ÖZEL REHBER (❓ YARDIM PENCERESİ) -->
+    <!-- =================================================================== -->
+    <div id="helpModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-card border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-3xl w-full max-w-md p-5 space-y-3.5 max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+                <h3 id="helpModalTitle" class="text-sm font-black text-white flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info text-emerald-400"></i>
+                    <span>Sayfa Rehberi</span>
+                </h3>
+                <button onclick="closeHelpModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="helpModalContent" class="text-xs leading-relaxed text-slate-300 space-y-2.5"></div>
+            <button onclick="closeHelpModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-extrabold py-2.5 rounded-2xl text-xs">
+                Anladım
+            </button>
+        </div>
+    </div>
+
+
+    <!-- =================================================================== -->
+    <!-- MODAL 8: SAAT 15:30 ÖDEME ONAY PENCERESİ [EVET / HAYIR] -->
+    <!-- =================================================================== -->
+    <div id="dueConfirmModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-card border border-rose-500/50 rounded-3xl w-full max-w-sm p-5 space-y-4 text-center urgent-pulse">
+            <div class="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-xl mx-auto">
+                <i class="fa-solid fa-bell"></i>
+            </div>
+            <div>
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-rose-400">15:30 Ödeme Kontrolü</span>
+                <h3 id="dueConfirmTitle" class="text-sm font-black text-white mt-1">Ödemeni Yaptın mı?</h3>
+                <p id="dueConfirmDesc" class="text-xs text-slate-300 mt-1"></p>
+            </div>
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <button onclick="respondDuePayment(false)" class="py-2.5 rounded-2xl bg-amoled border border-slate-700 text-slate-300 font-extrabold text-xs">
+                    ❌ Hayır, Sonra
+                </button>
+                <button onclick="respondDuePayment(true)" class="py-2.5 rounded-2xl bg-emerald-600 text-slate-950 font-black text-xs shadow-lg shadow-emerald-600/30">
+                    ✅ Evet, Ödedim
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- BİLDİRİM TOAST MESAJI -->
     <div id="toastBox" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 hidden bg-emerald-500 text-slate-950 text-xs font-black px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2">
         <i class="fa-solid fa-circle-check"></i>
         <span id="toastText">İşlem tamam!</span>
     </div>
 
+
     <script>
-        let loans = [{ id: 'l1', bank: 'Enpara', type: 'kredi', note: 'İhtiyaç', initialPrincipal: 100000, amount: 15000, day: 15, totalMonths: 12, currentMonth: 4, rate: 4.29, deferral: 0, paidThisMonth: false }];
-        let monthlyBills = [{ id: 'b1', title: 'Kira', amount: 12000, day: 5, paidThisMonth: false }, { id: 'b2', title: 'Elektrik', amount: 950, day: 10, paidThisMonth: false }];
-        let yearlyTaxes = [{ id: 't1', title: 'MTV', amount: 2500, day: 31, paidThisMonth: false }];
-        let vault = [];
-        let userPinCode = '1234';
+        // =========================================================================
+        // VERİ MODELLERİ VE BAŞLANGIÇ DURUMLARI
+        // =========================================================================
+        const MONTH_NAMES = [
+            "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+            "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"
+        ];
 
-        let currentDate = new Date();
-        let viewYear = currentDate.getFullYear();
-        let viewMonth = currentDate.getMonth();
+        let state = {
+            activeTab: 'genel',
+            loanFilter: 'all',
+            billSubTab: 'monthly',
+            pinUnlocked: false,
+            userPin: '1234',
+            calendarOffset: 0, // 0: Güncel ay (-120 ile +120 arası 10 yıl)
+            selectedDay: null,
+            pendingConfirmLoanId: null,
+            visiblePasswords: new Set(),
+            visibleNotes: new Set(),
+            loans: [],
+            bills: [],
+            taxes: [],
+            passwords: [],
+            notes: [],
+            monthlyIncome: 85000
+        };
 
-        let activeTab = 'genel';
-        let loanFilter = 'all';
-        let billSubTab = 'aylik';
-        let modalLoanType = 'kredi';
-        let showAllPins = false;
-        let visiblePinIds = new Set();
-        let isPinUnlocked = false;
+        const DEFAULT_TAXES = [
+            { id: 'tax_mtv', name: 'MTV (Motorlu Taşıtlar Vergisi)', months: [0, 6], amount: 2500, note: 'Ocak ve Temmuz taksiti' },
+            { id: 'tax_emlak', name: 'Emlak Vergisi', months: [4, 10], amount: 1200, note: 'Mayıs ve Kasım taksiti' },
+            { id: 'tax_kira_gelir', name: 'Kira Gelir Vergisi', months: [2, 6], amount: 0, note: 'Mart ve Temmuz taksiti' }
+        ];
 
-        function loadStorage() {
+        const DEFAULT_BILLS = [
+            { id: 'b_kira', name: 'Ev Kirası', amount: 22000, day: 1, active: true },
+            { id: 'b_elektrik', name: 'Elektrik Faturası', amount: 850, day: 15, active: true },
+            { id: 'b_dogalgaz', name: 'Doğalgaz Faturası', amount: 1400, day: 18, active: true },
+            { id: 'b_internet', name: 'Ev İnterneti', amount: 480, day: 22, active: true },
+            { id: 'b_su', name: 'Su Faturası', amount: 320, day: 25, active: true }
+        ];
+
+        const DEFAULT_LOANS = [
+            { id: 'l_1', bank: 'Enpara', type: 'kredi', note: 'İhtiyaç Kredisi', initialPrincipal: 150000, amount: 16500, totalMonths: 12, currentMonth: 4, deferralMonths: 0, day: 15, rate: 4.19, startYear: 2026, startMonth: 6, paidThisMonth: false },
+            { id: 'l_2', bank: 'Akbank', type: 'tna', note: 'TNA Nakit Avans', initialPrincipal: 30000, amount: 11200, totalMonths: 3, currentMonth: 1, deferralMonths: 0, day: 31, rate: 5.00, startYear: 2026, startMonth: 9, paidThisMonth: false }
+        ];
+
+        function loadAppData() {
             try {
-                const l = localStorage.getItem('fk_pro_loans');
-                const mb = localStorage.getItem('fk_pro_mbills');
-                const yt = localStorage.getItem('fk_pro_ytaxes');
-                const v = localStorage.getItem('fk_pro_vault');
-                const p = localStorage.getItem('fk_pro_user_pin');
-                if (l) loans = JSON.parse(l);
-                if (mb) monthlyBills = JSON.parse(mb);
-                if (yt) yearlyTaxes = JSON.parse(yt);
-                if (v) vault = JSON.parse(v);
-                if (p) userPinCode = p;
-            } catch (e) {}
+                const saved = localStorage.getItem('fk_pro_data_v2');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    state.loans = parsed.loans || [];
+                    state.bills = parsed.bills || [];
+                    state.taxes = parsed.taxes || DEFAULT_TAXES;
+                    state.passwords = parsed.passwords || [];
+                    state.notes = parsed.notes || [];
+                    state.userPin = parsed.userPin || '1234';
+                    state.monthlyIncome = parsed.monthlyIncome || 85000;
+                } else {
+                    state.loans = JSON.parse(JSON.stringify(DEFAULT_LOANS));
+                    state.bills = JSON.parse(JSON.stringify(DEFAULT_BILLS));
+                    state.taxes = JSON.parse(JSON.stringify(DEFAULT_TAXES));
+                    state.passwords = [];
+                    state.notes = [];
+                    state.userPin = '1234';
+                    state.monthlyIncome = 85000;
+                }
+            } catch (e) {
+                state.loans = JSON.parse(JSON.stringify(DEFAULT_LOANS));
+                state.bills = JSON.parse(JSON.stringify(DEFAULT_BILLS));
+                state.taxes = JSON.parse(JSON.stringify(DEFAULT_TAXES));
+                state.passwords = [];
+                state.notes = [];
+                state.userPin = '1234';
+            }
         }
 
-        function saveStorage() {
-            localStorage.setItem('fk_pro_loans', JSON.stringify(loans));
-            localStorage.setItem('fk_pro_mbills', JSON.stringify(monthlyBills));
-            localStorage.setItem('fk_pro_ytaxes', JSON.stringify(yearlyTaxes));
-            localStorage.setItem('fk_pro_vault', JSON.stringify(vault));
-            localStorage.setItem('fk_pro_user_pin', userPinCode);
+        function saveAppData() {
+            const dataToSave = {
+                loans: state.loans,
+                bills: state.bills,
+                taxes: state.taxes,
+                passwords: state.passwords,
+                notes: state.notes,
+                userPin: state.userPin,
+                monthlyIncome: state.monthlyIncome
+            };
+            localStorage.setItem('fk_pro_data_v2', JSON.stringify(dataToSave));
         }
 
-        const TAB_TITLES = {
+        // =========================================================================
+        // BANKA AMORTİSMAN & KISTELYEVİM FAİZLİ ERKEN KAPAMA MOTORU
+        // =========================================================================
+        function calculateLoanFinancials(loan, targetYear, targetMonth) {
+            const totalM = loan.type === 'tna' ? Math.min(3, Math.max(1, parseInt(loan.totalMonths) || 1)) : Math.max(1, parseInt(loan.totalMonths) || 1);
+            const pmt = parseFloat(loan.amount) || 0;
+            const P0 = parseFloat(loan.initialPrincipal) || (pmt * totalM * 0.7);
+            const rate = parseFloat(loan.rate) || (loan.type === 'tna' ? 5.00 : 4.29);
+            const effMonthlyRate = (rate / 100) * 1.30;
+
+            const startYear = loan.startYear || 2026;
+            const startMonth = loan.startMonth !== undefined ? loan.startMonth : 9;
+
+            const monthsPassed = (targetYear - startYear) * 12 + (targetMonth - startMonth);
+            const deferralM = Math.max(0, parseInt(loan.deferralMonths) || 0);
+
+            const totalDuration = deferralM + totalM;
+            const isActiveInTargetMonth = monthsPassed >= 0 && monthsPassed < totalDuration;
+            const isDeferralActive = monthsPassed >= 0 && monthsPassed < deferralM;
+
+            let remInstallments = 0;
+            if (monthsPassed < deferralM) {
+                remInstallments = totalM;
+            } else if (monthsPassed >= totalDuration) {
+                remInstallments = 0;
+            } else {
+                remInstallments = totalDuration - monthsPassed;
+            }
+
+            let remainingPrincipal = 0;
+            if (remInstallments > 0 && effMonthlyRate > 0) {
+                remainingPrincipal = pmt * ((1 - Math.pow(1 + effMonthlyRate, -remInstallments)) / effMonthlyRate);
+            }
+            remainingPrincipal = Math.min(P0, remainingPrincipal);
+
+            const dailyAccrued = remainingPrincipal * effMonthlyRate * (14 / 30);
+            const closingBuffer = remainingPrincipal * 0.015;
+            let earlyPayoff = Math.round(remainingPrincipal + dailyAccrued + closingBuffer);
+            const remainingGross = Math.round(remInstallments * pmt);
+            earlyPayoff = Math.min(remainingGross, earlyPayoff);
+
+            const savedInterest = Math.max(0, remainingGross - earlyPayoff);
+
+            return {
+                isActive: isActiveInTargetMonth,
+                isDeferral: isDeferralActive,
+                remInstallments,
+                remainingGross,
+                earlyPayoff,
+                savedInterest,
+                effMonthlyRate
+            };
+        }
+
+        // =========================================================================
+        // DİNAMİK TAKVİM BİLGİSİ & "BU AYA DÖN"
+        // =========================================================================
+        function getCalendarDateInfo(offset) {
+            const baseDate = new Date();
+            const target = new Date(baseDate.getFullYear(), baseDate.getMonth() + offset, 1);
+            const year = target.getFullYear();
+            const month = target.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const isCurrentMonth = offset === 0;
+
+            return { year, month, daysInMonth, isCurrentMonth, dateObj: target };
+        }
+
+        function changeMonthOffset(delta) {
+            const newOffset = state.calendarOffset + delta;
+            if (newOffset < -120 || newOffset > 120) {
+                showToast("10 yıldan daha ileriye veya geriye gidilemez.");
+                return;
+            }
+            state.calendarOffset = newOffset;
+            state.selectedDay = null;
+            renderAll();
+        }
+
+        function resetToCurrentMonth() {
+            state.calendarOffset = 0;
+            state.selectedDay = null;
+            renderAll();
+            showToast("Güncel aya dönüldü!");
+        }
+
+        // =========================================================================
+        // 1. SEKME: GENEL BORÇ & TAKVİM & BAR RENDER
+        // =========================================================================
+        function renderGenelTab() {
+            const cal = getCalendarDateInfo(state.calendarOffset);
+            document.getElementById('calendarMonthTitle').textContent = `${MONTH_NAMES[cal.month]} ${cal.year}`;
+            
+            const subLabel = document.getElementById('calendarMonthSub');
+            const returnBtn = document.getElementById('returnToCurrentMonthBtn');
+
+            if (cal.isCurrentMonth) {
+                subLabel.textContent = "Günümüz (Aktif Ay)";
+                returnBtn.classList.add('hidden');
+            } else {
+                subLabel.textContent = state.calendarOffset < 0 ? `${Math.abs(state.calendarOffset)} Ay Önce` : `${state.calendarOffset} Ay Sonra`;
+                returnBtn.classList.remove('hidden');
+            }
+
+            document.getElementById('headerDateBadge').textContent = `${new Date().getDate()} ${MONTH_NAMES[new Date().getMonth()].substring(0,3)}`;
+
+            let loanTotal = 0;
+            let loanRemaining = 0;
+            let totalEarlyPayoff = 0;
+            let totalGrossDebt = 0;
+            let paidCount = 0;
+            let totalItemsCount = 0;
+            const itemsForMonth = [];
+
+            // 1. Krediler ve TNA'lar (31. Gün Eşleme Mantığıyla)
+            state.loans.forEach(loan => {
+                const fin = calculateLoanFinancials(loan, cal.year, cal.month);
+                if (fin.isActive && !fin.isDeferral) {
+                    const dueAmount = Number(loan.amount) || 0;
+                    loanTotal += dueAmount;
+                    totalItemsCount++;
+
+                    const originalDay = parseInt(loan.day) || 15;
+                    // Akıllı Eşleme: Eğer ay 28/29/30 çekiyorsa ve ödeme günü 31 ise o ayın son gününe bağla
+                    let effectiveDay = originalDay;
+                    let overflowNote = "";
+                    if (originalDay > cal.daysInMonth) {
+                        effectiveDay = cal.daysInMonth;
+                        overflowNote = ` (Ayın ${originalDay}'i yerine son günü ${effectiveDay}'i)`;
+                    }
+
+                    const isPaid = cal.isCurrentMonth ? !!loan.paidThisMonth : false;
+                    if (isPaid) {
+                        paidCount++;
+                    } else {
+                        loanRemaining += dueAmount;
+                    }
+
+                    totalEarlyPayoff += fin.earlyPayoff;
+                    totalGrossDebt += fin.remainingGross;
+
+                    itemsForMonth.push({
+                        id: loan.id,
+                        type: loan.type === 'tna' ? 'TNA' : 'Kredi',
+                        title: `${loan.bank} - ${loan.note || (loan.type === 'tna' ? 'Nakit Avans' : 'Kredi')}${overflowNote}`,
+                        amount: dueAmount,
+                        day: effectiveDay,
+                        originalDay: originalDay,
+                        isPaid: isPaid,
+                        isLoan: true,
+                        earlyPayoff: fin.earlyPayoff,
+                        savedInterest: fin.savedInterest
+                    });
+                }
+            });
+
+            // 2. Faturalar (31. Gün Eşleme Mantığıyla)
+            let billTotal = 0;
+            let billRemaining = 0;
+            state.bills.forEach(bill => {
+                if (bill.active !== false && bill.amount && Number(bill.amount) > 0) {
+                    const bAmt = Number(bill.amount);
+                    billTotal += bAmt;
+                    totalItemsCount++;
+
+                    const originalDay = parseInt(bill.day) || 15;
+                    let effectiveDay = originalDay;
+                    let overflowNote = "";
+                    if (originalDay > cal.daysInMonth) {
+                        effectiveDay = cal.daysInMonth;
+                        overflowNote = ` (Ayın ${originalDay}'i yerine son günü ${effectiveDay}'i)`;
+                    }
+
+                    const isPaid = cal.isCurrentMonth ? !!bill.paidThisMonth : false;
+                    if (isPaid) paidCount++;
+                    else billRemaining += bAmt;
+
+                    itemsForMonth.push({
+                        id: bill.id,
+                        type: 'Fatura',
+                        title: `${bill.name}${overflowNote}`,
+                        amount: bAmt,
+                        day: effectiveDay,
+                        originalDay: originalDay,
+                        isPaid: isPaid,
+                        isLoan: false
+                    });
+                }
+            });
+
+            // 3. Vergiler
+            let taxTotal = 0;
+            state.taxes.forEach(tax => {
+                if (tax.months.includes(cal.month) && tax.amount && Number(tax.amount) > 0) {
+                    const tAmt = Number(tax.amount);
+                    taxTotal += tAmt;
+                    totalItemsCount++;
+                    itemsForMonth.push({
+                        id: tax.id,
+                        type: 'Vergi',
+                        title: tax.name,
+                        amount: tAmt,
+                        day: Math.min(30, cal.daysInMonth),
+                        originalDay: 30,
+                        isPaid: false,
+                        isLoan: false
+                    });
+                }
+            });
+
+            const overallMonthDue = loanTotal + billTotal + taxTotal;
+            const overallRemainingDue = loanRemaining + billRemaining + (cal.isCurrentMonth ? taxTotal : 0);
+
+            document.getElementById('gbTotalMonthDue').textContent = formatTL(overallMonthDue);
+            document.getElementById('gbMonthRemainingDue').textContent = `Kalan: ${formatTL(overallRemainingDue)}`;
+            document.getElementById('gbBreakdownLoan').textContent = formatTL(loanTotal);
+            document.getElementById('gbBreakdownBill').textContent = formatTL(billTotal);
+            document.getElementById('gbBreakdownTax').textContent = formatTL(taxTotal);
+            document.getElementById('gbEarlyPayoffSum').textContent = formatTL(totalEarlyPayoff);
+            document.getElementById('gbGrossDebtSum').textContent = formatTL(totalGrossDebt);
+            document.getElementById('gbPaidCountBadge').textContent = `${paidCount}/${totalItemsCount} Ödendi`;
+
+            // Dinamik Gün Haritası
+            document.getElementById('calDaysLabel').textContent = `Ödeme Günleri (1 - ${cal.daysInMonth})`;
+            const todayDate = new Date();
+            let calGridHtml = '';
+
+            for (let d = 1; d <= cal.daysInMonth; d++) {
+                const dayItems = itemsForMonth.filter(x => x.day === d);
+                const hasUnpaid = dayItems.some(x => !x.isPaid);
+                const hasPaid = dayItems.length > 0 && !hasUnpaid;
+
+                let cls = 'bg-amoled/70 text-slate-500 border-slate-800/80';
+                let dot = '';
+
+                if (hasUnpaid) {
+                    cls = 'bg-rose-950/80 text-rose-200 border-rose-500/50 font-black';
+                    dot = '<span class="w-1.5 h-1.5 rounded-full bg-rose-500 inline-block mt-0.5"></span>';
+                } else if (hasPaid) {
+                    cls = 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40 font-bold';
+                    dot = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block mt-0.5"></span>';
+                }
+
+                if (cal.isCurrentMonth && d === todayDate.getDate()) {
+                    cls += ' ring-2 ring-emerald-400 text-white';
+                }
+
+                calGridHtml += `
+                    <button onclick="selectCalendarDay(${d})" class="border rounded-2xl py-2 flex flex-col items-center justify-center text-xs transition active:scale-90 ${cls}">
+                        <span>${d}</span>
+                        ${dot}
+                    </button>
+                `;
+            }
+            document.getElementById('calendarGrid').innerHTML = calGridHtml;
+
+            // Gün Detay Gösterimi
+            const dayInfoEl = document.getElementById('selectedDayInfo');
+            if (state.selectedDay) {
+                const sItems = itemsForMonth.filter(x => x.day === state.selectedDay);
+                dayInfoEl.classList.remove('hidden');
+                if (sItems.length === 0) {
+                    dayInfoEl.innerHTML = `<span class="text-slate-400 font-semibold">Ayın ${state.selectedDay}. gününde planlanmış ödeme yok.</span>`;
+                } else {
+                    dayInfoEl.innerHTML = `
+                        <div class="font-black text-emerald-400 mb-1 border-b border-slate-800 pb-1">
+                            Ayın ${state.selectedDay}'i Ödemeleri (${sItems.length} Kalem):
+                        </div>
+                        <div class="space-y-1">
+                            ${sItems.map(it => `
+                                <div class="flex justify-between items-center text-[11px]">
+                                    <span class="text-white font-bold">${it.title}</span>
+                                    <span class="${it.isPaid ? 'text-emerald-400' : 'text-rose-400'} font-black">${formatTL(it.amount)} ${it.isPaid ? '✓' : '(Bekliyor)'}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+            } else {
+                dayInfoEl.classList.add('hidden');
+            }
+
+            // Gerçek Dinamik 7 Aylık Bar Grafiği
+            renderDynamicBarChart();
+
+            // Seçili Aydaki Tüm Kalemler Listesi
+            const monthListContainer = document.getElementById('monthItemsList');
+            if (itemsForMonth.length === 0) {
+                monthListContainer.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">Bu ay için kayıtlı borç veya ödeme bulunmuyor.</p>`;
+            } else {
+                monthListContainer.innerHTML = itemsForMonth.map(item => `
+                    <div class="bg-amoled/85 border ${item.isPaid ? 'border-emerald-500/30' : 'border-slate-800'} rounded-2xl p-3 flex items-center justify-between">
+                        <div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-[9px] font-black px-1.5 py-0.5 rounded ${item.type === 'Kredi' ? 'bg-purple-500/20 text-purple-300' : (item.type === 'TNA' ? 'bg-amber-500/20 text-amber-300' : 'bg-blue-500/20 text-blue-300')}">${item.type}</span>
+                                <h4 class="text-xs font-black text-white">${item.title}</h4>
+                            </div>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Her ayın ${item.originalDay || item.day}'i • ${item.isPaid ? '<span class="text-emerald-400 font-bold">Ödendi</span>' : '<span class="text-rose-400 font-bold">Ödeme Bekliyor</span>'}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-black text-white">${formatTL(item.amount)}</span>
+                            ${item.isLoan ? `
+                                <button onclick="togglePaymentStatus('${item.id}', true)" class="px-2.5 py-1 rounded-xl text-[10px] font-extrabold ${item.isPaid ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30' : 'bg-emerald-500 text-slate-950'} active:scale-95 transition">
+                                    ${item.isPaid ? 'Geri Al' : 'Öde'}
+                                </button>
+                            ` : `
+                                <button onclick="toggleBillPayment('${item.id}')" class="px-2.5 py-1 rounded-xl text-[10px] font-extrabold ${item.isPaid ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30' : 'bg-emerald-500 text-slate-950'} active:scale-95 transition">
+                                    ${item.isPaid ? 'Geri Al' : 'Öde'}
+                                </button>
+                            `}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function selectCalendarDay(d) {
+            state.selectedDay = state.selectedDay === d ? null : d;
+            renderGenelTab();
+        }
+
+        // =========================================================================
+        // GERÇEK ORANSAL VE DİNAMİK 7 AYLIK BAR GRAFİĞİ
+        // =========================================================================
+        function calculateTotalDueForOffset(offset) {
+            const cal = getCalendarDateInfo(offset);
+            let sum = 0;
+            state.loans.forEach(loan => {
+                const fin = calculateLoanFinancials(loan, cal.year, cal.month);
+                if (fin.isActive && !fin.isDeferral) sum += Number(loan.amount) || 0;
+            });
+            state.bills.forEach(bill => {
+                if (bill.active !== false && bill.amount) sum += Number(bill.amount) || 0;
+            });
+            state.taxes.forEach(tax => {
+                if (tax.months.includes(cal.month) && tax.amount) sum += Number(tax.amount) || 0;
+            });
+            return sum;
+        }
+
+        function renderDynamicBarChart() {
+            const currentOffset = state.calendarOffset;
+            const offsets = [currentOffset - 3, currentOffset - 2, currentOffset - 1, currentOffset, currentOffset + 1, currentOffset + 2, currentOffset + 3];
+            
+            const data = offsets.map(off => {
+                const cal = getCalendarDateInfo(off);
+                const total = calculateTotalDueForOffset(off);
+                return {
+                    offset: off,
+                    label: MONTH_NAMES[cal.month].substring(0, 3),
+                    year: String(cal.year).slice(-2),
+                    total: total,
+                    isSelected: off === currentOffset
+                };
+            });
+
+            // 7 ay arasındaki maksimum tutarı bul
+            const maxVal = Math.max(...data.map(d => d.total));
+            const container = document.getElementById('barChartContainer');
+
+            container.innerHTML = data.map(d => {
+                // Dinamik oransal yükseklik: %10 (sıfır/küçük) ile %100 arası
+                let heightPct = 10;
+                if (maxVal > 0) {
+                    heightPct = Math.max(12, Math.round((d.total / maxVal) * 100));
+                }
+
+                const formattedCompact = d.total >= 1000 ? (d.total / 1000).toFixed(1).replace('.0', '') + 'B' : (d.total > 0 ? d.total : '0');
+
+                let barClass = d.isSelected
+                    ? "bg-gradient-to-t from-emerald-500 to-teal-300 shadow-lg shadow-emerald-500/30 ring-2 ring-emerald-300"
+                    : "bg-slate-800 hover:bg-slate-700";
+
+                let textClass = d.isSelected ? "text-emerald-300 font-black" : "text-slate-400 font-semibold";
+
+                return `
+                    <div onclick="setExplicitOffset(${d.offset})" class="flex-1 flex flex-col items-center h-full justify-end cursor-pointer group">
+                        <span class="text-[9px] font-extrabold ${textClass} mb-1 opacity-90">${formattedCompact}</span>
+                        <div class="w-full max-w-[28px] rounded-t-xl transition-all duration-500 ${barClass}" style="height: ${heightPct}%"></div>
+                        <span class="text-[10px] mt-1.5 ${textClass}">${d.label}</span>
+                        <span class="text-[8px] text-slate-500 -mt-0.5">'${d.year}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function setExplicitOffset(off) {
+            state.calendarOffset = off;
+            state.selectedDay = null;
+            renderAll();
+        }
+
+        // =========================================================================
+        // 2. SEKME: KREDİLERİM YÖNETİMİ & MANUEL MÜDAHALE
+        // =========================================================================
+        function setLoanFilter(f) {
+            state.loanFilter = f;
+            ['all', 'kredi', 'tna'].forEach(k => {
+                const btn = document.getElementById(`lf-${k}`);
+                btn.className = k === f
+                    ? "px-2.5 py-1.5 rounded-lg bg-emerald-600 text-slate-950 transition whitespace-nowrap"
+                    : "px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition whitespace-nowrap";
+            });
+            renderKredilerTab();
+        }
+
+        function renderKredilerTab() {
+            let list = state.loans.slice();
+            if (state.loanFilter === 'kredi') list = list.filter(x => x.type === 'kredi');
+            if (state.loanFilter === 'tna') list = list.filter(x => x.type === 'tna');
+
+            const container = document.getElementById('loansListContainer');
+            if (list.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-card border border-slate-800 rounded-3xl p-6 text-center space-y-2">
+                        <i class="fa-solid fa-credit-card text-2xl text-slate-600"></i>
+                        <p class="text-xs text-slate-400">Henüz kayıtlı bir kredi veya taksitli nakit avans yok.</p>
+                    </div>`;
+                return;
+            }
+
+            const now = new Date();
+            container.innerHTML = list.map(item => {
+                const fin = calculateLoanFinancials(item, now.getFullYear(), now.getMonth());
+                const isPaid = !!item.paidThisMonth;
+                const progressPct = Math.min(100, Math.round(((item.currentMonth) / item.totalMonths) * 100));
+
+                return `
+                <div class="bg-card border ${isPaid ? 'border-emerald-500/30' : 'border-slate-800'} rounded-3xl p-4 space-y-3">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <h3 class="text-sm font-black text-white">${item.bank}</h3>
+                                <span class="text-[9px] font-black px-2 py-0.5 rounded-lg ${item.type === 'tna' ? 'bg-amber-500/20 text-amber-300' : 'bg-purple-500/20 text-purple-300'}">
+                                    ${item.type === 'tna' ? 'TNA (' + item.totalMonths + ' Taksit)' : 'Kredi (' + item.totalMonths + ' Ay)'}
+                                </span>
+                                ${item.deferralMonths > 0 ? `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-amber-300">${item.deferralMonths} Ay Erteli</span>` : ''}
+                                <span class="text-[10px] text-slate-400 bg-amoled px-2 py-0.5 rounded-lg font-bold">%${Number(item.rate || 0).toFixed(2)}</span>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-0.5">${item.note || ''}</p>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <span class="text-[10px] text-slate-400 block">Aylık Taksit</span>
+                            <span class="text-sm font-black text-white">${formatTL(item.amount)}</span>
+                        </div>
+                    </div>
+
+                    <!-- İLERLEME ÇUBUĞU -->
+                    <div class="bg-amoled/80 border border-slate-800 rounded-2xl p-2.5 space-y-1.5">
+                        <div class="flex justify-between text-[10px]">
+                            <span class="text-slate-300 font-bold">Çekilen: <strong class="text-white">${formatTL(item.initialPrincipal)}</strong></span>
+                            <span class="text-emerald-400 font-extrabold">${item.currentMonth} / ${item.totalMonths}. Taksit (${fin.remInstallments} Kaldı)</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                            <div class="bg-gradient-to-r from-emerald-500 to-teal-300 h-full rounded-full" style="width: ${progressPct}%"></div>
+                        </div>
+                    </div>
+
+                    <!-- ERKEN KAPAMA TUTARI VE KÂR -->
+                    <div class="grid grid-cols-3 gap-1.5 text-center bg-amoled/50 rounded-2xl p-2 border border-slate-800/60">
+                        <div>
+                            <p class="text-[9px] text-slate-400">Banka Erken Kapama</p>
+                            <p class="text-xs font-black text-emerald-400 mt-0.5">${formatTL(fin.earlyPayoff)}</p>
+                        </div>
+                        <div class="border-x border-slate-800">
+                            <p class="text-[9px] text-slate-400">Vade Sonu Brüt</p>
+                            <p class="text-xs font-extrabold text-rose-400 mt-0.5">${formatTL(fin.remainingGross)}</p>
+                        </div>
+                        <div>
+                            <p class="text-[9px] text-slate-400">Silinecek Faiz</p>
+                            <p class="text-xs font-extrabold text-indigo-300 mt-0.5">${formatTL(fin.savedInterest)}</p>
+                        </div>
+                    </div>
+
+                    <!-- MANUEL MÜDAHALE (ÖDENDİ / GERİ AL) -->
+                    <div class="flex items-center justify-between pt-0.5">
+                        <span class="text-[10px] font-bold ${isPaid ? 'text-emerald-400' : 'text-slate-400'}">
+                            ${isPaid ? '✓ Bu ay ödendi olarak işlendi' : `Her ayın ${item.day}'i ödenir`}
+                        </span>
+                        <div class="flex items-center gap-2">
+                            <button onclick="togglePaymentStatus('${item.id}', false)" class="px-3 py-1.5 rounded-xl text-xs font-black ${isPaid ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-emerald-600 text-slate-950'} active:scale-95 transition">
+                                ${isPaid ? 'Geri Al' : 'Ödendi İşaretle'}
+                            </button>
+                            <button onclick="openLoanModal('${item.id}')" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function togglePaymentStatus(loanId, rerenderAll = false) {
+            const loan = state.loans.find(x => x.id === loanId);
+            if (!loan) return;
+            if (!loan.paidThisMonth) {
+                loan.paidThisMonth = true;
+                if (loan.currentMonth < loan.totalMonths) {
+                    loan.currentMonth += 1;
+                }
+                showToast(`${loan.bank} taksiti ödendi olarak kaydedildi!`);
+            } else {
+                loan.paidThisMonth = false;
+                if (loan.currentMonth > 1) {
+                    loan.currentMonth -= 1;
+                }
+                showToast(`${loan.bank} taksiti geri alındı.`);
+            }
+            saveAppData();
+            renderAll();
+        }
+
+        // =========================================================================
+        // 3. SEKME: FATURA & VERGİ YÖNETİMİ
+        // =========================================================================
+        function setBillSubTab(tab) {
+            state.billSubTab = tab;
+            document.getElementById('subTab-monthly').classList.toggle('hidden', tab !== 'monthly');
+            document.getElementById('subTab-yearly').classList.toggle('hidden', tab !== 'yearly');
+
+            document.getElementById('subTabBtn-monthly').className = tab === 'monthly'
+                ? "py-2.5 px-3 rounded-xl bg-blue-600 text-white transition flex items-center justify-center gap-2"
+                : "py-2.5 px-3 rounded-xl text-slate-400 hover:text-white transition flex items-center justify-center gap-2";
+
+            document.getElementById('subTabBtn-yearly').className = tab === 'yearly'
+                ? "py-2.5 px-3 rounded-xl bg-amber-600 text-white transition flex items-center justify-center gap-2"
+                : "py-2.5 px-3 rounded-xl text-slate-400 hover:text-white transition flex items-center justify-center gap-2";
+        }
+
+        function renderFaturaTab() {
+            const monthlyContainer = document.getElementById('monthlyBillsList');
+            if (state.bills.length === 0) {
+                monthlyContainer.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">Kayıtlı fatura yok.</p>`;
+            } else {
+                monthlyContainer.innerHTML = state.bills.map(b => `
+                    <div class="bg-card border border-slate-800 rounded-2xl p-3 flex items-center justify-between">
+                        <div>
+                            <h4 class="text-xs font-black text-white">${b.name}</h4>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Her ayın ${b.day || 15}'i • ${b.amount ? formatTL(b.amount) : 'Tutar Değişken'}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="openBillModal('${b.id}')" class="w-8 h-8 rounded-xl bg-slate-800 text-slate-200 flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const yearlyContainer = document.getElementById('yearlyTaxesList');
+            yearlyContainer.innerHTML = state.taxes.map(t => {
+                const monthsStr = t.months.map(m => MONTH_NAMES[m]).join(' ve ');
+                return `
+                <div class="bg-card border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between">
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">Sabit Vergi</span>
+                            <h4 class="text-xs font-black text-white">${t.name}</h4>
+                        </div>
+                        <p class="text-[10px] text-slate-400 mt-1">${monthsStr} Dönemi • ${t.amount ? formatTL(t.amount) : 'Belirtilmedi'}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-black text-amber-300">${formatTL(t.amount || 0)}</span>
+                        <button onclick="openTaxModal('${t.id}')" class="w-8 h-8 rounded-xl bg-slate-800 text-slate-200 flex items-center justify-center text-xs">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function toggleBillPayment(billId) {
+            const b = state.bills.find(x => x.id === billId);
+            if (!b) return;
+            b.paidThisMonth = !b.paidThisMonth;
+            saveAppData();
+            renderAll();
+            showToast(`${b.name} ödeme durumu güncellendi.`);
+        }
+
+        // =========================================================================
+        // 4. SEKME: DANIŞMAN & GELİR DENGESİ & VADELİ MEVDUAT
+        // =========================================================================
+        function setAdvisorLumpSum(val) {
+            document.getElementById('advLumpSumInput').value = val;
+            calculateAdvisorAndBalance();
+        }
+
+        function calculateAdvisorAndBalance() {
+            const income = parseFloat(document.getElementById('monthlyIncomeInput').value) || 0;
+            state.monthlyIncome = income;
+
+            const currentTotalDue = calculateTotalDueForOffset(0);
+            const netCashRemaining = income - currentTotalDue;
+
+            document.getElementById('advTotalExpenseThisMonth').textContent = formatTL(currentTotalDue);
+            document.getElementById('advNetRemainingCash').textContent = formatTL(netCashRemaining);
+            document.getElementById('advNetRemainingCash').className = `text-sm font-black mt-0.5 block ${netCashRemaining >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+
+            const lumpSum = parseFloat(document.getElementById('advLumpSumInput').value) || 0;
+            const depRate = parseFloat(document.getElementById('advDepositRate').value) || 48;
+            const stopaj = parseFloat(document.getElementById('advStopajRate').value) || 10;
+
+            const netMonthlyDepositYield = ((lumpSum * depRate * 32) / 36500) * (1 - stopaj / 100);
+
+            const now = new Date();
+            const activeDebts = state.loans.map(loan => {
+                const fin = calculateLoanFinancials(loan, now.getFullYear(), now.getMonth());
+                return { ...loan, ...fin };
+            }).filter(d => d.earlyPayoff > 0 && d.remInstallments > 0);
+
+            activeDebts.sort((a, b) => (b.savedInterest / b.earlyPayoff) - (a.savedInterest / a.earlyPayoff));
+
+            let budget = lumpSum;
+            const closedList = [];
+            let totalSavedInterest = 0;
+            let totalFreedInstallments = 0;
+
+            activeDebts.forEach(d => {
+                if (budget >= d.earlyPayoff) {
+                    budget -= d.earlyPayoff;
+                    closedList.push(d);
+                    totalSavedInterest += d.savedInterest;
+                    totalFreedInstallments += Number(d.amount);
+                }
+            });
+
+            const remainingDepositYield = ((budget * depRate * 32) / 36500) * (1 - stopaj / 100);
+
+            document.getElementById('advisorResultsBox').innerHTML = `
+                <div class="bg-amoled/90 border border-slate-800 rounded-2xl p-3 space-y-2 text-xs">
+                    <div class="flex justify-between items-center text-indigo-300 font-extrabold pb-1 border-b border-slate-800">
+                        <span>Seçenek A: Tamamını Vadeliye Atarsan</span>
+                        <span class="text-white font-black">+${formatTL(netMonthlyDepositYield)} / ay</span>
+                    </div>
+                    <div class="space-y-1.5 pt-1">
+                        <span class="text-emerald-400 font-extrabold block">Seçenek B: En Yüksek Faizli Borçları Kapatırsan:</span>
+                        <div class="grid grid-cols-2 gap-2 text-[11px]">
+                            <div class="bg-card p-2 rounded-xl border border-slate-800">
+                                <span class="text-slate-400 block">Kapatılan Borç:</span>
+                                <span class="font-bold text-white">${closedList.length} Adet</span>
+                            </div>
+                            <div class="bg-card p-2 rounded-xl border border-slate-800">
+                                <span class="text-slate-400 block">Silinen Faiz Kârı:</span>
+                                <span class="font-black text-emerald-400">+${formatTL(totalSavedInterest)}</span>
+                            </div>
+                        </div>
+                        <p class="text-[10px] text-slate-300 mt-1">
+                            Aylık <strong>+${formatTL(totalFreedInstallments)}</strong> taksit yükünden kurtulursun. Kalan <strong>${formatTL(budget)}</strong> mevduata atılarak her ay net <strong>+${formatTL(remainingDepositYield)}</strong> kazandırır.
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function calculateSimpleDeposit() {
+            const p = parseFloat(document.getElementById('calcDepPrincipal').value) || 0;
+            const r = parseFloat(document.getElementById('calcDepRate').value) || 0;
+            const days = parseInt(document.getElementById('calcDepDays').value) || 32;
+
+            const gross = (p * r * days) / 36500;
+            const net = gross * 0.90;
+            document.getElementById('calcDepNetReturn').textContent = '+' + formatTL(net);
+        }
+
+        // =========================================================================
+        // 5. SEKME: PIN KORUMALI ŞİFRELER & GÜVENLİ NOTLAR
+        // =========================================================================
+        function checkPinEntry(val) {
+            if (val.length === 4) {
+                if (val === state.userPin) {
+                    unlockVault();
+                } else {
+                    showToast('Hatalı PIN kodu!');
+                    document.getElementById('vaultPinInput').value = '';
+                }
+            }
+        }
+
+        function unlockVault() {
+            const pinVal = document.getElementById('vaultPinInput').value;
+            if (pinVal === state.userPin) {
+                state.pinUnlocked = true;
+                document.getElementById('pinLockScreen').classList.add('hidden');
+                document.getElementById('vaultUnlockedContent').classList.remove('hidden');
+                renderVaultPasswords();
+                renderVaultNotes();
+            } else {
+                showToast('Hatalı PIN kodu!');
+            }
+        }
+
+        function renderVaultPasswords() {
+            const container = document.getElementById('vaultPasswordsList');
+            if (state.passwords.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-amoled/50 border border-slate-800 rounded-2xl p-4 text-center space-y-1">
+                        <p class="text-xs text-slate-400 font-semibold">Kayıtlı banka şifresi yok.</p>
+                        <p class="text-[10px] text-slate-500">"+ Şifre Ekle" butonuyla yeni şifre oluşturabilirsiniz.</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = state.passwords.map(p => {
+                const isVisible = state.visiblePasswords.has(p.id);
+                return `
+                <div class="bg-amoled/85 border border-slate-800 rounded-2xl p-3 flex items-center justify-between">
+                    <div>
+                        <h4 class="text-xs font-black text-white">${p.title}</h4>
+                        <p class="text-xs font-mono font-bold tracking-wider mt-0.5 ${isVisible ? 'text-emerald-400' : 'text-slate-500'}">
+                            ${isVisible ? p.secret : '••••••••'}
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="togglePasswordVisibility('${p.id}')" class="w-8 h-8 rounded-xl bg-slate-800 text-slate-300 flex items-center justify-center text-xs">
+                            <i class="fa-solid ${isVisible ? 'fa-eye-slash' : 'fa-eye'}"></i>
+                        </button>
+                        <button onclick="copyToClipboard('${p.secret}', '${p.title}')" class="bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-1.5 rounded-xl text-[11px] font-black">
+                            Kopyala
+                        </button>
+                        <button onclick="openPasswordModal('${p.id}')" class="w-8 h-8 rounded-xl bg-slate-800 text-slate-300 flex items-center justify-center text-xs">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderVaultNotes() {
+            const container = document.getElementById('vaultNotesList');
+            if (state.notes.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-amoled/50 border border-slate-800 rounded-2xl p-4 text-center space-y-1">
+                        <p class="text-xs text-slate-400 font-semibold">Kayıtlı güvenli not yok.</p>
+                        <p class="text-[10px] text-slate-500">IBAN, kart numaraları ve finansal hatırlatıcılarınızı buraya ekleyebilirsiniz.</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = state.notes.map(n => {
+                const isVisible = state.visibleNotes.has(n.id);
+                return `
+                <div class="bg-amoled/85 border border-slate-800 rounded-2xl p-3 space-y-1.5">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-xs font-black text-amber-300 flex items-center gap-1.5">
+                            <i class="fa-solid fa-quote-left text-[10px] text-amber-400/60"></i>
+                            <span>${n.title}</span>
+                        </h4>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="toggleNoteVisibility('${n.id}')" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-300 flex items-center justify-center text-xs">
+                                <i class="fa-solid ${isVisible ? 'fa-eye-slash' : 'fa-eye'}"></i>
+                            </button>
+                            <button onclick="copyToClipboard('${n.content.replace(/'/g, "\\'")}', '${n.title}')" class="bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-1 rounded-lg text-[10px] font-bold">
+                                Kopyala
+                            </button>
+                            <button onclick="openNoteModal('${n.id}')" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-300 flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <p class="text-xs font-mono break-all leading-relaxed ${isVisible ? 'text-slate-200' : 'text-slate-500'}">
+                        ${isVisible ? n.content : '••••••••••••••••••••••••••••••••'}
+                    </p>
+                </div>`;
+            }).join('');
+        }
+
+        function togglePasswordVisibility(id) {
+            if (state.visiblePasswords.has(id)) state.visiblePasswords.delete(id);
+            else state.visiblePasswords.add(id);
+            renderVaultPasswords();
+        }
+
+        function toggleNoteVisibility(id) {
+            if (state.visibleNotes.has(id)) state.visibleNotes.delete(id);
+            else state.visibleNotes.add(id);
+            renderVaultNotes();
+        }
+
+        function copyToClipboard(text, label) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            showToast(`${label} panoya kopyalandı!`);
+        }
+
+        // =========================================================================
+        // GÜVENLİ NOT MODAL İŞLEMLERİ (YENİ!)
+        // =========================================================================
+        function openNoteModal(id = null) {
+            const modal = document.getElementById('noteModal');
+            const delBtn = document.getElementById('deleteNoteBtn');
+            if (id) {
+                const n = state.notes.find(x => x.id === id);
+                if (!n) return;
+                document.getElementById('noteModalTitle').textContent = 'Not Düzenle';
+                document.getElementById('editNoteId').value = n.id;
+                document.getElementById('noteTitleInput').value = n.title;
+                document.getElementById('noteContentInput').value = n.content;
+                delBtn.classList.remove('hidden');
+            } else {
+                document.getElementById('noteModalTitle').textContent = 'Yeni Güvenli Not Ekle';
+                document.getElementById('editNoteId').value = '';
+                document.getElementById('noteTitleInput').value = '';
+                document.getElementById('noteContentInput').value = '';
+                delBtn.classList.add('hidden');
+            }
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeNoteModal() {
+            document.getElementById('noteModal').classList.add('hidden');
+            document.getElementById('noteModal').classList.remove('flex');
+        }
+
+        function saveNoteModalData() {
+            const id = document.getElementById('editNoteId').value;
+            const title = document.getElementById('noteTitleInput').value.trim();
+            const content = document.getElementById('noteContentInput').value.trim();
+            if (!title || !content) return showToast('Lütfen başlık ve not içeriğini girin!');
+
+            if (id) {
+                const n = state.notes.find(x => x.id === id);
+                if (n) { n.title = title; n.content = content; }
+            } else {
+                state.notes.push({ id: 'nt_' + Date.now(), title, content });
+            }
+            saveAppData();
+            closeNoteModal();
+            renderVaultNotes();
+            showToast('Not kaydedildi.');
+        }
+
+        function deleteCurrentNote() {
+            const id = document.getElementById('editNoteId').value;
+            state.notes = state.notes.filter(x => x.id !== id);
+            saveAppData();
+            closeNoteModal();
+            renderVaultNotes();
+            showToast('Not silindi.');
+        }
+
+        // 2 AŞAMALI PIN DEĞİŞTİRME
+        function openChangePinModal() {
+            document.getElementById('newPin1').value = '';
+            document.getElementById('newPin2').value = '';
+            document.getElementById('pinMismatchError').classList.add('hidden');
+            document.getElementById('changePinModal').classList.remove('hidden');
+            document.getElementById('changePinModal').classList.add('flex');
+        }
+
+        function closeChangePinModal() {
+            document.getElementById('changePinModal').classList.add('hidden');
+            document.getElementById('changePinModal').classList.remove('flex');
+        }
+
+        function saveNewPin() {
+            const p1 = document.getElementById('newPin1').value.trim();
+            const p2 = document.getElementById('newPin2').value.trim();
+            const err = document.getElementById('pinMismatchError');
+
+            if (p1.length !== 4 || isNaN(p1)) {
+                err.textContent = 'PIN 4 haneli rakamlardan oluşmalıdır!';
+                err.classList.remove('hidden');
+                return;
+            }
+            if (p1 !== p2) {
+                err.textContent = 'Girdiğiniz PIN kodları birbiriyle uyuşmuyor!';
+                err.classList.remove('hidden');
+                return;
+            }
+
+            state.userPin = p1;
+            saveAppData();
+            closeChangePinModal();
+            showToast('Güvenlik PIN kodunuz güncellendi!');
+        }
+
+        function resetAllAppData() {
+            state.loans = [];
+            state.bills = [];
+            state.taxes = JSON.parse(JSON.stringify(DEFAULT_TAXES));
+            state.passwords = [];
+            state.notes = [];
+            state.userPin = '1234';
+            saveAppData();
+            renderAll();
+            showToast('Tüm veriler sıfırlandı, tertemiz yapıldı!');
+        }
+
+        function exportDataJSON() {
+            const data = {
+                loans: state.loans,
+                bills: state.bills,
+                taxes: state.taxes,
+                passwords: state.passwords,
+                notes: state.notes,
+                userPin: state.userPin,
+                exportDate: new Date().toISOString()
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `Finans_Kasam_Yedek_${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            showToast('Yedek JSON dosyası indirildi!');
+        }
+
+        function importDataJSON(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const r = new FileReader();
+            r.onload = ev => {
+                try {
+                    const parsed = JSON.parse(ev.target.result);
+                    if (parsed.loans) state.loans = parsed.loans;
+                    if (parsed.bills) state.bills = parsed.bills;
+                    if (parsed.taxes) state.taxes = parsed.taxes;
+                    if (parsed.passwords) state.passwords = parsed.passwords;
+                    if (parsed.notes) state.notes = parsed.notes;
+                    if (parsed.userPin) state.userPin = parsed.userPin;
+                    saveAppData();
+                    renderAll();
+                    showToast('Yedek başarıyla yüklendi!');
+                } catch (err) {
+                    showToast('Geçersiz yedek dosyası!');
+                }
+            };
+            r.readAsText(file);
+        }
+
+        // =========================================================================
+        // SAAT 15:30 VE 1 GÜN ÖNCE HATIRLATMA MOTORU
+        // =========================================================================
+        function checkDueAlerts(forceCheck = false) {
+            const now = new Date();
+            const today = now.getDate();
+            const hour = now.getHours();
+            const min = now.getMinutes();
+
+            const urgentItems = [];
+
+            state.loans.forEach(loan => {
+                if (!loan.paidThisMonth) {
+                    const day = parseInt(loan.day) || 15;
+                    if (day === today) {
+                        urgentItems.push({ ...loan, isToday: true });
+                    } else if (day === today + 1) {
+                        urgentItems.push({ ...loan, isTomorrow: true });
+                    }
+                }
+            });
+
+            const alertContainer = document.getElementById('urgentAlertContainer');
+
+            if (urgentItems.length > 0) {
+                alertContainer.classList.remove('hidden');
+                alertContainer.innerHTML = urgentItems.map(it => `
+                    <div class="bg-rose-950/70 border border-rose-500/60 rounded-2xl p-3 flex items-center justify-between urgent-pulse">
+                        <div>
+                            <span class="text-[9px] font-black px-1.5 py-0.5 rounded ${it.isToday ? 'bg-rose-500 text-white' : 'bg-amber-400 text-slate-950'} mr-1">
+                                ${it.isToday ? 'BUGÜN ÖDEME GÜNÜ' : '1 GÜN ÖNCE UYARI (YARIN)'}
+                            </span>
+                            <h4 class="text-xs font-black text-white mt-1">${it.bank} - ${it.note || 'Taksit'}</h4>
+                            <p class="text-[10px] text-rose-200">${formatTL(it.amount)} • Saat 15:30 Onayı</p>
+                        </div>
+                        <button onclick="openDueConfirmModal('${it.id}')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-3 py-1.5 rounded-xl text-xs shadow-lg">
+                            Ödedim mi?
+                        </button>
+                    </div>
+                `).join('');
+
+                if (forceCheck || (hour === 15 && min >= 30)) {
+                    openDueConfirmModal(urgentItems[0].id);
+                }
+            } else {
+                alertContainer.classList.add('hidden');
+                if (forceCheck) showToast('Bugün veya yarın için bekleyen ödeme yok.');
+            }
+        }
+
+        function openDueConfirmModal(loanId) {
+            const loan = state.loans.find(x => x.id === loanId);
+            if (!loan) return;
+            state.pendingConfirmLoanId = loanId;
+            document.getElementById('dueConfirmTitle').textContent = `${loan.bank} Borcunu Ödedin mi?`;
+            document.getElementById('dueConfirmDesc').textContent = `Tutar: ${formatTL(loan.amount)} (Ayın ${loan.day}'i ödemesi)`;
+            const modal = document.getElementById('dueConfirmModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function respondDuePayment(didPay) {
+            const modal = document.getElementById('dueConfirmModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+
+            if (didPay && state.pendingConfirmLoanId) {
+                togglePaymentStatus(state.pendingConfirmLoanId, true);
+            } else {
+                showToast('Ödeme beklemeye devam ediyor.');
+            }
+            state.pendingConfirmLoanId = null;
+        }
+
+        // =========================================================================
+        // KREDİ MODAL İŞLEMLERİ
+        // =========================================================================
+        let modalLoanType = 'kredi';
+        let modalDeferralMonths = 0;
+
+        function setModalType(t) {
+            modalLoanType = t;
+            document.getElementById('mType-kredi').className = t === 'kredi'
+                ? "py-2 rounded-xl border text-xs font-extrabold flex items-center justify-center gap-1.5 bg-purple-600/20 border-purple-500 text-purple-300"
+                : "py-2 rounded-xl border text-xs font-extrabold flex items-center justify-center gap-1.5 bg-amoled border-slate-800 text-slate-400";
+            document.getElementById('mType-tna').className = t === 'tna'
+                ? "py-2 rounded-xl border text-xs font-extrabold flex items-center justify-center gap-1.5 bg-amber-500/20 border-amber-500 text-amber-300"
+                : "py-2 rounded-xl border text-xs font-extrabold flex items-center justify-center gap-1.5 bg-amoled border-slate-800 text-slate-400";
+
+            const tnaBox = document.getElementById('tnaInstallmentLimitBox');
+            const totalMonthsInput = document.getElementById('mTotalMonths');
+
+            if (t === 'tna') {
+                tnaBox.classList.remove('hidden');
+                totalMonthsInput.max = 3;
+                let v = parseInt(totalMonthsInput.value) || 3;
+                if (v > 3) v = 3;
+                setTnaVadePreset(v);
+                document.getElementById('mRate').value = 5.00;
+            } else {
+                tnaBox.classList.add('hidden');
+                totalMonthsInput.max = 120;
+                document.getElementById('mAmountLabel').textContent = 'Aylık Taksit Tutarı (₺)';
+            }
+            updateLoanModalCalculations();
+        }
+
+        function setTnaVadePreset(n) {
+            const count = Math.min(3, Math.max(1, parseInt(n) || 3));
+            document.getElementById('mTotalMonths').value = count;
+            [1, 2, 3].forEach(k => {
+                const btn = document.getElementById(`tnaBtn-${k}`);
+                if (!btn) return;
+                btn.className = k === count
+                    ? "py-1.5 px-2 rounded-xl border text-[11px] font-bold bg-amber-500/25 border-amber-500 text-amber-300"
+                    : "py-1.5 px-2 rounded-xl border text-[11px] font-bold bg-amoled border-slate-800 text-slate-300";
+            });
+            document.getElementById('mAmountLabel').textContent = count === 1 ? 'Tek Çekim Tutarı (₺)' : 'Aylık Taksit Tutarı (₺)';
+            updateLoanModalCalculations();
+        }
+
+        function onTotalMonthsInput() {
+            const inp = document.getElementById('mTotalMonths');
+            let v = parseInt(inp.value) || 1;
+            if (modalLoanType === 'tna' && v > 3) {
+                v = 3;
+                inp.value = 3;
+                showToast('TNA yasal olarak en fazla 3 taksit olabilir!');
+            }
+            if (modalLoanType === 'tna') setTnaVadePreset(v);
+            else updateLoanModalCalculations();
+        }
+
+        function setDeferralPreset(m) {
+            modalDeferralMonths = parseInt(m) || 0;
+            [0, 1, 2, 3].forEach(k => {
+                const btn = document.getElementById(`defBtn-${k}`);
+                if (!btn) return;
+                btn.className = k === modalDeferralMonths
+                    ? "py-1.5 rounded-xl border text-[10px] font-bold bg-amber-500/20 border-amber-500 text-amber-300"
+                    : "py-1.5 rounded-xl border text-[10px] font-bold bg-card border-slate-800 text-slate-400";
+            });
+            updateLoanModalCalculations();
+        }
+
+        function setQuickRate(r) {
+            document.getElementById('mRate').value = r;
+            updateLoanModalCalculations();
+        }
+
+        function updateLoanModalCalculations() {
+            const tempLoan = {
+                type: modalLoanType,
+                initialPrincipal: parseFloat(document.getElementById('mInitialPrincipal').value) || 0,
+                amount: parseFloat(document.getElementById('mMonthlyAmount').value) || 0,
+                totalMonths: parseInt(document.getElementById('mTotalMonths').value) || (modalLoanType === 'tna' ? 3 : 12),
+                currentMonth: parseInt(document.getElementById('mCurrentMonth').value) || 1,
+                deferralMonths: modalDeferralMonths,
+                day: parseInt(document.getElementById('mDay').value) || 15,
+                rate: parseFloat(document.getElementById('mRate').value) || 4.29,
+                startYear: 2026,
+                startMonth: 9
+            };
+            const now = new Date();
+            const fin = calculateLoanFinancials(tempLoan, now.getFullYear(), now.getMonth());
+
+            document.getElementById('prevRemStatus').textContent = `${fin.remInstallments} Taksit ${tempLoan.deferralMonths > 0 ? '(+Erteleme)' : ''}`;
+            document.getElementById('prevGross').textContent = formatTL(fin.remainingGross);
+            document.getElementById('prevEarlyPayoff').textContent = formatTL(fin.earlyPayoff);
+            document.getElementById('prevSavedInterest').textContent = formatTL(fin.savedInterest);
+        }
+
+        function openLoanModal(id = null) {
+            const modal = document.getElementById('loanModal');
+            const delBtn = document.getElementById('deleteLoanBtn');
+            if (id) {
+                const item = state.loans.find(x => x.id === id);
+                if (!item) return;
+                document.getElementById('loanModalTitle').textContent = `${item.bank} Düzenle`;
+                document.getElementById('editLoanId').value = item.id;
+                document.getElementById('mBankSelect').value = item.bank;
+                document.getElementById('mNote').value = item.note || '';
+                document.getElementById('mInitialPrincipal').value = item.initialPrincipal || '';
+                document.getElementById('mMonthlyAmount').value = item.amount;
+                document.getElementById('mTotalMonths').value = item.totalMonths;
+                document.getElementById('mCurrentMonth').value = item.currentMonth;
+                document.getElementById('mDay').value = item.day;
+                document.getElementById('mRate').value = item.rate;
+                setModalType(item.type || 'kredi');
+                setDeferralPreset(item.deferralMonths || 0);
+                delBtn.classList.remove('hidden');
+            } else {
+                document.getElementById('loanModalTitle').textContent = 'Yeni Kredi / TNA Ekle';
+                document.getElementById('editLoanId').value = '';
+                document.getElementById('mNote').value = '';
+                document.getElementById('mInitialPrincipal').value = '';
+                document.getElementById('mMonthlyAmount').value = '';
+                document.getElementById('mTotalMonths').value = 12;
+                document.getElementById('mCurrentMonth').value = 1;
+                document.getElementById('mDay').value = 15;
+                document.getElementById('mRate').value = 4.49;
+                setModalType('kredi');
+                setDeferralPreset(0);
+                delBtn.classList.add('hidden');
+            }
+            updateLoanModalCalculations();
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeLoanModal() {
+            document.getElementById('loanModal').classList.add('hidden');
+            document.getElementById('loanModal').classList.remove('flex');
+        }
+
+        function saveLoanModalData() {
+            const id = document.getElementById('editLoanId').value;
+            const bank = document.getElementById('mBankSelect').value;
+            const note = document.getElementById('mNote').value.trim();
+            const initialPrincipal = parseFloat(document.getElementById('mInitialPrincipal').value) || 0;
+            const amount = parseFloat(document.getElementById('mMonthlyAmount').value) || 0;
+            let totalMonths = Math.max(1, parseInt(document.getElementById('mTotalMonths').value) || 12);
+            if (modalLoanType === 'tna') totalMonths = Math.min(3, Math.max(1, totalMonths));
+            const currentMonth = Math.min(totalMonths, Math.max(1, parseInt(document.getElementById('mCurrentMonth').value) || 1));
+            const day = Math.min(31, Math.max(1, parseInt(document.getElementById('mDay').value) || 15));
+            const rate = parseFloat(document.getElementById('mRate').value) || 4.29;
+
+            if (amount <= 0) {
+                showToast('Lütfen geçerli bir taksit tutarı girin!');
+                return;
+            }
+
+            const now = new Date();
+            const startOffset = currentMonth - 1;
+            const startCalDate = new Date(now.getFullYear(), now.getMonth() - startOffset, 1);
+
+            if (id) {
+                const item = state.loans.find(x => x.id === id);
+                if (item) {
+                    Object.assign(item, {
+                        bank, note, initialPrincipal, amount, totalMonths, currentMonth,
+                        deferralMonths: modalDeferralMonths, day, rate, type: modalLoanType,
+                        startYear: startCalDate.getFullYear(), startMonth: startCalDate.getMonth()
+                    });
+                }
+            } else {
+                state.loans.unshift({
+                    id: 'l_' + Date.now(),
+                    bank, note, initialPrincipal, amount, totalMonths, currentMonth,
+                    deferralMonths: modalDeferralMonths, day, rate, type: modalLoanType,
+                    startYear: startCalDate.getFullYear(), startMonth: startCalDate.getMonth(),
+                    paidThisMonth: false
+                });
+            }
+
+            saveAppData();
+            closeLoanModal();
+            renderAll();
+            showToast(`${bank} kaydedildi.`);
+        }
+
+        function deleteCurrentLoan() {
+            const id = document.getElementById('editLoanId').value;
+            state.loans = state.loans.filter(x => x.id !== id);
+            saveAppData();
+            closeLoanModal();
+            renderAll();
+            showToast('Kredi silindi.');
+        }
+
+        // =========================================================================
+        // FATURA VE VERGİ MODALLARI
+        // =========================================================================
+        function openBillModal(id = null) {
+            const modal = document.getElementById('billModal');
+            const delBtn = document.getElementById('deleteBillBtn');
+            if (id) {
+                const b = state.bills.find(x => x.id === id);
+                if (!b) return;
+                document.getElementById('billModalTitle').textContent = 'Fatura Düzenle';
+                document.getElementById('editBillId').value = b.id;
+                document.getElementById('billNameInput').value = b.name;
+                document.getElementById('billAmountInput').value = b.amount || '';
+                document.getElementById('billDayInput').value = b.day || 15;
+                delBtn.classList.remove('hidden');
+            } else {
+                document.getElementById('billModalTitle').textContent = 'Yeni Fatura Ekle';
+                document.getElementById('editBillId').value = '';
+                document.getElementById('billNameInput').value = '';
+                document.getElementById('billAmountInput').value = '';
+                document.getElementById('billDayInput').value = 15;
+                delBtn.classList.add('hidden');
+            }
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeBillModal() {
+            document.getElementById('billModal').classList.add('hidden');
+            document.getElementById('billModal').classList.remove('flex');
+        }
+
+        function saveBillModalData() {
+            const id = document.getElementById('editBillId').value;
+            const name = document.getElementById('billNameInput').value.trim();
+            const amount = parseFloat(document.getElementById('billAmountInput').value) || 0;
+            const day = Math.min(31, Math.max(1, parseInt(document.getElementById('billDayInput').value) || 15));
+
+            if (!name) return showToast('Lütfen fatura adını girin!');
+
+            if (id) {
+                const b = state.bills.find(x => x.id === id);
+                if (b) { b.name = name; b.amount = amount; b.day = day; }
+            } else {
+                state.bills.push({ id: 'b_' + Date.now(), name, amount, day, active: true });
+            }
+            saveAppData();
+            closeBillModal();
+            renderAll();
+            showToast('Fatura kaydedildi.');
+        }
+
+        function deleteCurrentBill() {
+            const id = document.getElementById('editBillId').value;
+            state.bills = state.bills.filter(x => x.id !== id);
+            saveAppData();
+            closeBillModal();
+            renderAll();
+            showToast('Fatura silindi.');
+        }
+
+        function openTaxModal(id) {
+            const t = state.taxes.find(x => x.id === id);
+            if (!t) return;
+            document.getElementById('editTaxId').value = t.id;
+            document.getElementById('taxNameInput').value = t.name;
+            document.getElementById('taxAmountInput').value = t.amount || 0;
+            const modal = document.getElementById('taxModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeTaxModal() {
+            document.getElementById('taxModal').classList.add('hidden');
+            document.getElementById('taxModal').classList.remove('flex');
+        }
+
+        function saveTaxModalData() {
+            const id = document.getElementById('editTaxId').value;
+            const amt = parseFloat(document.getElementById('taxAmountInput').value) || 0;
+            const t = state.taxes.find(x => x.id === id);
+            if (t) t.amount = amt;
+            saveAppData();
+            closeTaxModal();
+            renderAll();
+            showToast('Vergi tutarı güncellendi.');
+        }
+
+        // =========================================================================
+        // ŞİFRE MODALI
+        // =========================================================================
+        function openPasswordModal(id = null) {
+            const modal = document.getElementById('passwordModal');
+            const delBtn = document.getElementById('deletePwdBtn');
+            if (id) {
+                const p = state.passwords.find(x => x.id === id);
+                if (!p) return;
+                document.getElementById('pwdModalTitle').textContent = 'Şifre Düzenle';
+                document.getElementById('editPwdId').value = p.id;
+                document.getElementById('pwdTitleInput').value = p.title;
+                document.getElementById('pwdSecretInput').value = p.secret;
+                delBtn.classList.remove('hidden');
+            } else {
+                document.getElementById('pwdModalTitle').textContent = 'Yeni Şifre / PIN Ekle';
+                document.getElementById('editPwdId').value = '';
+                document.getElementById('pwdTitleInput').value = '';
+                document.getElementById('pwdSecretInput').value = '';
+                delBtn.classList.add('hidden');
+            }
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').classList.add('hidden');
+            document.getElementById('passwordModal').classList.remove('flex');
+        }
+
+        function savePasswordModalData() {
+            const id = document.getElementById('editPwdId').value;
+            const title = document.getElementById('pwdTitleInput').value.trim();
+            const secret = document.getElementById('pwdSecretInput').value.trim();
+            if (!title || !secret) return showToast('Lütfen başlık ve şifreyi girin!');
+
+            if (id) {
+                const p = state.passwords.find(x => x.id === id);
+                if (p) { p.title = title; p.secret = secret; }
+            } else {
+                state.passwords.push({ id: 'pwd_' + Date.now(), title, secret });
+            }
+            saveAppData();
+            closePasswordModal();
+            renderVaultPasswords();
+            showToast('Şifre kaydedildi.');
+        }
+
+        function deleteCurrentPassword() {
+            const id = document.getElementById('editPwdId').value;
+            state.passwords = state.passwords.filter(x => x.id !== id);
+            saveAppData();
+            closePasswordModal();
+            renderVaultPasswords();
+            showToast('Şifre silindi.');
+        }
+
+        // =========================================================================
+        // REHBER (❓ YARDIM) İÇERİKLERİ VE MODALI
+        // =========================================================================
+        const HELP_CONTENT = {
+            genel: {
+                title: "Genel Borç Rehberi",
+                body: `
+                    <p><strong>Genel Borç Nedir?</strong> O ay ödemeniz gereken Krediler, TNA'lar, Faturalar ve Yıllık Sabit Vergilerin toplam yükünü gösterir.</p>
+                    <p><strong>Dinamik 7'li Bar Grafiği:</strong> 3 ay geçmiş, seçili ay ve önümüzdeki 3 ayın yükünü oransal gösterir. Hangi ay daha az veya çok ödeyeceğiniz çubukların yüksekliğinden anında anlaşılır.</p>
+                    <p><strong>31 Çekmeyen Aylarda Ödeme:</strong> Örneğin Şubat ayı 28 gün çekiyorsa veya Nisan 30 gün çekiyorsa, ayın 31'i ödemeniz otomatik olarak o ayın son gününe bağlanır; asla kaybolmaz!</p>
+                    <p><strong>Bu Aya Dön Butonu:</strong> Gelecekte veya geçmişte gezinirken takvim başlığındaki "Bu Aya Dön" butonuyla anında bugünkü aya dönebilirsiniz.</p>
+                `
+            },
+            krediler: {
+                title: "Kredilerim & TNA Rehberi",
+                body: `
+                    <p><strong>Nasıl Kredi / TNA Oluşturulur?</strong> "Kredi / TNA Ekle" butonuna basın. Banka adını seçin, çekilen anaparayı, aylık taksiti ve kaçıncı ayda olduğunuzu girin.</p>
+                    <p><strong>TNA Kuralı:</strong> Nakit Avans türü seçildiğinde vade BDDK kuralı gereği maksimum 3 Taksit veya 1 Ay Tek Çekim ile sınırlandırılır.</p>
+                    <p><strong>Erken Kapama Tutarı:</strong> Kartlardaki yeşil rakam, bankanın gerçek amortisman formülü ve günlük işleyen kıstelyevim faizi hesaba katılarak hesaplanır.</p>
+                `
+            },
+            fatura: {
+                title: "Fatura & Vergi Rehberi",
+                body: `
+                    <p><strong>Aylık Faturalar:</strong> Ev Kirası, Elektrik, Su, Doğalgaz gibi her ay ödenen giderlerdir.</p>
+                    <p><strong>Yıllık Sabit Vergiler:</strong> MTV (Ocak & Temmuz), Emlak Vergisi (Mayıs & Kasım) ve Kira Gelir Vergisi (Mart & Temmuz) sistemde tanımlıdır. Tutar girildiğinde sadece o ayların borcuna eklenir.</p>
+                `
+            },
+            danisman: {
+                title: "Danışman & Vadeli Rehberi",
+                body: `
+                    <p><strong>Bütçe Dengesi:</strong> Net maaşınızdan o ayki tüm kredi taksitleri ve faturalar düşülerek elinizde kalan net nakit gösterilir.</p>
+                    <p><strong>Toplu Para Karşılaştırması:</strong> Elinize geçen toplu parayla borç kapatmanın mı yoksa mevduata yatırmanın mı daha karlı olduğunu hesaplar.</p>
+                `
+            },
+            sifreler: {
+                title: "Şifre & Güvenli Notlar Rehberi",
+                body: `
+                    <p><strong>4 Haneli PIN Kilidi:</strong> Varsayılan giriş PIN kodu: <strong>1234</strong>'tür. Sekmeye girdiğinizde "PIN Değiştir" butonuyla yeni şifrenizi 2 kez girerek güncelleyebilirsiniz.</p>
+                    <p><strong>Güvenli Notlar:</strong> IBAN numaraları, müşteri numaraları ve gizli finansal notlarınızı güvenle saklayabilirsiniz.</p>
+                    <p><strong>Gizlilik:</strong> Şifreler ve notlar cihazınızda tutulur. "Tüm Verileri Sıfırla" butonuyla tek tıkla her şeyi temizleyebilirsiniz.</p>
+                `
+            }
+        };
+
+        function openTabHelpModal() {
+            const info = HELP_CONTENT[state.activeTab] || HELP_CONTENT.genel;
+            document.getElementById('helpModalTitle').innerHTML = `<i class="fa-solid fa-circle-info text-emerald-400"></i> <span>${info.title}</span>`;
+            document.getElementById('helpModalContent').innerHTML = info.body;
+            const modal = document.getElementById('helpModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeHelpModal() {
+            document.getElementById('helpModal').classList.add('hidden');
+            document.getElementById('helpModal').classList.remove('flex');
+        }
+
+        // =========================================================================
+        // SEKME YÖNETİMİ & TOAST
+        // =========================================================================
+        const TAB_NAMES = {
             genel: 'Genel Borç',
             krediler: 'Kredilerim',
             fatura: 'Fatura & Vergi',
-            danisman: 'Danışman & Gelir',
-            sifreler: 'Şifreler Kasası'
+            danisman: 'Danışman & Vadeli',
+            sifreler: 'Şifreler & Notlar'
         };
 
-        function switchTab(tabKey) {
-            activeTab = tabKey;
-            document.getElementById('headerTitle').textContent = TAB_TITLES[tabKey] || 'Finans Kasam';
+        function switchTab(tKey) {
+            state.activeTab = tKey;
+            document.getElementById('headerTitle').textContent = TAB_NAMES[tKey] || 'Finans Kasam Pro';
+
             ['genel', 'krediler', 'fatura', 'danisman', 'sifreler'].forEach(k => {
                 const sec = document.getElementById(`tab-${k}`);
                 const nav = document.getElementById(`nav-${k}`);
-                if (k === tabKey) {
+                if (k === tKey) {
                     sec.classList.remove('hidden');
                     nav.className = "flex flex-col items-center justify-center py-2 rounded-2xl text-emerald-400 bg-emerald-500/15 font-extrabold transition";
                 } else {
@@ -473,544 +2351,45 @@
                     nav.className = "flex flex-col items-center justify-center py-2 rounded-2xl text-slate-400 hover:text-slate-200 font-semibold transition";
                 }
             });
+
+            if (tKey === 'sifreler' && !state.pinUnlocked) {
+                document.getElementById('pinLockScreen').classList.remove('hidden');
+                document.getElementById('vaultUnlockedContent').classList.add('hidden');
+                document.getElementById('vaultPinInput').value = '';
+            }
+
             window.scrollTo({ top: 0, behavior: 'instant' });
-        }
-
-        function changeCalendarMonth(direction) {
-            let newMonth = viewMonth + direction;
-            let newYear = viewYear;
-            if (newMonth > 11) { newMonth = 0; newYear++; }
-            else if (newMonth < 0) { newMonth = 11; newYear--; }
-
-            const diffYears = newYear - currentDate.getFullYear();
-            if (diffYears >= -10 && diffYears <= 10) {
-                viewMonth = newMonth;
-                viewYear = newYear;
-                renderGenelBorcTab();
-            } else {
-                showToast('±10 yıl sınırına ulaşıldı!');
-            }
-        }
-
-        function resetCalendarToCurrent() {
-            viewYear = currentDate.getFullYear();
-            viewMonth = currentDate.getMonth();
-            renderGenelBorcTab();
-        }
-
-        // Seçilen Yıl ve Aya Göre Kredinin Aktif Olup Olmadığını Kontrol Eden Güçlü Motor
-        function calculateLoadForMonth(targetYear, targetMonth) {
-            let total = 0;
-            const nowYear = currentDate.getFullYear();
-            const nowMonth = currentDate.getMonth();
-            const targetTotalMonths = targetYear * 12 + targetMonth;
-            const currentTotalMonths = nowYear * 12 + nowMonth;
-            const monthDiff = targetTotalMonths - currentTotalMonths;
-
-            loans.forEach(i => {
-                const startMonthIndex = (i.currentMonth || 1);
-                const activeMonthIndex = startMonthIndex + monthDiff;
-                // Kredi başlangıç ve bitiş aralığında mı?
-                if (activeMonthIndex >= 1 && activeMonthIndex <= (i.totalMonths || 12)) {
-                    total += Number(i.amount) || 0;
-                }
-            });
-
-            monthlyBills.forEach(b => total += Number(b.amount) || 0);
-            return total;
-        }
-
-        function renderGenelBorcTab() {
-            const daysInViewMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-            const monthNames = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
-            
-            document.getElementById('todayBadge').textContent = `${currentDate.getDate()} ${monthNames[currentDate.getMonth()].substring(0,3)} ${currentDate.getFullYear()}`;
-            document.getElementById('calendarTitleLabel').innerHTML = `<i class="fa-regular fa-calendar-check text-emerald-400"></i><span>${monthNames[viewMonth]} ${viewYear} Ödeme Takvimi</span>`;
-            document.getElementById('calendarFullDateSubtitle').textContent = viewYear === currentDate.getFullYear() && viewMonth === currentDate.getMonth() ? "Aktif Ay (Bugün)" : "Geçmiş / Gelecek Simülasyon Görünümü";
-            document.getElementById('selectedMonthNameLabel').textContent = `${monthNames[viewMonth]} ${viewYear} Toplam Ödemesi`;
-
-            // Seçilen aya göre aylık toplam yük
-            let monthlyTotal = calculateLoadForMonth(viewYear, viewMonth);
-            let grossTotal = 0, initialTotal = 0, earlyTotal = 0, pending1530 = 0;
-
-            loans.forEach(i => {
-                const nowYear = currentDate.getFullYear();
-                const nowMonth = currentDate.getMonth();
-                const targetTotalMonths = viewYear * 12 + viewMonth;
-                const currentTotalMonths = nowYear * 12 + nowMonth;
-                const monthDiff = targetTotalMonths - currentTotalMonths;
-                const activeMonthIndex = (i.currentMonth || 1) + monthDiff;
-
-                // Sadece aktif olduğu dönemdeki kalan borç ve erken kapama hesaplanır
-                if (activeMonthIndex >= 1 && activeMonthIndex <= (i.totalMonths || 12)) {
-                    let remM = Math.max(0, (i.totalMonths || 12) - activeMonthIndex + 1);
-                    grossTotal += remM * Number(i.amount);
-                    initialTotal += Number(i.initialPrincipal) || 0;
-                    earlyTotal += remM * Number(i.amount) * 0.85;
-                }
-
-                if (viewYear === currentDate.getFullYear() && viewMonth === currentDate.getMonth() && !i.paidThisMonth) {
-                    if (Number(i.day) === currentDate.getDate()) {
-                        pending1530 += Number(i.amount);
-                    }
-                }
-            });
-
-            monthlyBills.forEach(b => {
-                if (viewYear === currentDate.getFullYear() && viewMonth === currentDate.getMonth() && !b.paidThisMonth) {
-                    if (Number(b.day) === currentDate.getDate()) {
-                        pending1530 += Number(b.amount) || 0;
-                    }
-                }
-            });
-
-            document.getElementById('gbMonthlyTotal').textContent = formatTL(monthlyTotal);
-            document.getElementById('gbGrossTotal').textContent = formatTL(grossTotal);
-            document.getElementById('gbInitialTotal').textContent = `Çekilen: ${formatTL(initialTotal)}`;
-            document.getElementById('gbPending1530Total').textContent = formatTL(pending1530);
-            document.getElementById('gbEarlyPayoffTotal').textContent = formatTL(earlyTotal);
-            document.getElementById('selectedMonthTotalLoad').textContent = formatTL(monthlyTotal);
-
-            // 31 Çekmeyen Ay Emniyeti
-            let calHtml = '';
-            for (let d = 1; d <= daysInViewMonth; d++) {
-                const dayItems = loans.filter(i => {
-                    const nowYear = currentDate.getFullYear();
-                    const nowMonth = currentDate.getMonth();
-                    const targetTotalMonths = viewYear * 12 + viewMonth;
-                    const currentTotalMonths = nowYear * 12 + nowMonth;
-                    const monthDiff = targetTotalMonths - currentTotalMonths;
-                    const activeMonthIndex = (i.currentMonth || 1) + monthDiff;
-                    if (!(activeMonthIndex >= 1 && activeMonthIndex <= (i.totalMonths || 12))) return false;
-
-                    const itemDay = Math.min(Number(i.day), daysInViewMonth);
-                    return itemDay === d;
-                }).concat(monthlyBills.filter(b => Math.min(Number(b.day), daysInViewMonth) === d));
-
-                let cls = 'bg-amoled text-slate-500 border-slate-900';
-                if (dayItems.length > 0) cls = 'bg-emerald-950/70 text-emerald-300 border-emerald-500/40 font-bold';
-                if (viewYear === currentDate.getFullYear() && viewMonth === currentDate.getMonth() && d === currentDate.getDate()) {
-                    cls += ' ring-2 ring-emerald-400 text-white';
-                }
-                calHtml += `<button onclick="inspectCalendarDay(${d})" class="border rounded-xl py-2 flex flex-col items-center justify-center text-xs ${cls}"><span>${d}</span></button>`;
-            }
-            document.getElementById('calendarGrid').innerHTML = calHtml;
-
-            // 7 Aylık Bar Tablosu (Seçilen Ayı Merkez Alan ve Turuncu Vurgulayan Yapı)
-            let maxBarVal = 1;
-            const barMonths = [];
-            for (let i = -3; i <= 3; i++) {
-                let m = viewMonth + i;
-                let y = viewYear;
-                if (m > 11) { m -= 12; y++; }
-                else if (m < 0) { m += 12; y--; }
-                const load = calculateLoadForMonth(y, m);
-                if (load > maxBarVal) maxBarVal = load;
-                barMonths.push({ m, y, load, isSelected: (i === 0) });
-            }
-
-            document.getElementById('sevenMonthBarChart').innerHTML = barMonths.map(bm => {
-                const pct = Math.max(10, Math.round((bm.load / maxBarVal) * 100));
-                const barColor = bm.isSelected ? 'bg-amber-500' : 'bg-emerald-600';
-                const textColor = bm.isSelected ? 'text-amber-300 font-black' : 'text-slate-300 font-bold';
-                return `
-                    <div class="space-y-1">
-                        <div class="flex justify-between text-[11px]">
-                            <span class="${textColor}">${monthNames[bm.m]} ${bm.y} ${bm.isSelected ? '(Seçili Ay)' : ''}</span>
-                            <span class="text-white font-extrabold">${formatTL(bm.load)}</span>
-                        </div>
-                        <div class="w-full bg-amoled h-2 rounded-full overflow-hidden border border-slate-900">
-                            <div class="${barColor} h-full rounded-full transition-all duration-300" style="width: ${pct}%"></div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function inspectCalendarDay(day) {
-            const daysInViewMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-            const items = loans.filter(i => Math.min(Number(i.day), daysInViewMonth) === day).concat(monthlyBills.filter(b => Math.min(Number(b.day), daysInViewMonth) === day));
-            const info = document.getElementById('selectedDayInfo');
-            info.classList.remove('hidden');
-            info.textContent = items.length === 0 ? `Ayın ${day}. gününde ödeme yok.` : `Ayın ${day}: ` + items.map(x => `${x.bank || x.title} (${formatTL(x.amount || 0)})`).join(', ');
+            renderAll();
         }
 
         function formatTL(val) {
             return Math.round(Number(val) || 0).toLocaleString('tr-TR') + ' ₺';
         }
 
-        function speakGeneralSummary() {
-            const total = document.getElementById('gbMonthlyTotal').textContent;
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.speak(new SpeechSynthesisUtterance(`Seçilen ay toplam ödeme yükünüz ${total}.`));
-            }
-        }
-
-        // SAYFA REHBERLERİ
-        const PAGE_GUIDES = {
-            genel: {
-                title: '📊 Genel Borç Sayfası Rehberi',
-                content: `• <strong>Simülasyon Aralığı:</strong> ±10 yıl (2016 - 2036) arasında geçmişe veya geleceğe gidebilirsiniz.<br>• <strong>Dinamik Takvim:</strong> Takvimde seçtiğiniz aya göre vade sonu, erken kapama ve aylık ödeme yükleri anında güncellenir.`
-            },
-            krediler: {
-                title: '💳 Kredilerim Sayfası Rehberi',
-                content: `• <strong>Kredi & TNA:</strong> Popüler bankalardan seçim yapabilir, faiz oranını girebilir ve TNA için erteleme uygulayabilirsiniz.`
-            },
-            fatura: {
-                title: '🧾 Fatura & Vergi Sayfası Rehberi',
-                content: `• <strong>Kira ve Giderler:</strong> Kira dahil tüm sabit ve değişken ödemelerinizi ekleyebilirsiniz.`
-            },
-            danisman: {
-                title: '🧠 Danışman & Gelir Sayfası Rehberi',
-                content: `• <strong>Net Bakiye:</strong> Maaşınızı girdiğinizde tüm kredi ve faturalar düşülerek kalan net bakiye hesaplanır.`
-            },
-            sifreler: {
-                title: '🔐 Şifreler Kasası Rehberi',
-                content: `• <strong>Güvenlik:</strong> PIN şifrenizi çift teyitli olarak değiştirebilirsiniz.`
-            }
-        };
-
-        function openPageHelpModal() {
-            const guide = PAGE_GUIDES[activeTab] || PAGE_GUIDES.genel;
-            document.getElementById('helpModalTitle').innerHTML = `<i class="fa-solid fa-circle-question text-emerald-400"></i> ${guide.title}`;
-            document.getElementById('helpModalContent').innerHTML = guide.content;
-            document.getElementById('pageHelpModal').classList.remove('hidden');
-            document.getElementById('pageHelpModal').classList.add('flex');
-        }
-
-        function closePageHelpModal() { document.getElementById('pageHelpModal').classList.add('hidden'); }
-
-        function verifyPinCode() {
-            const code = document.getElementById('pinInputCode').value;
-            if (code === userPinCode) {
-                isPinUnlocked = true;
-                document.getElementById('pinLockScreen').classList.add('hidden');
-                document.getElementById('vaultContentArea').classList.remove('hidden');
-                renderVaultList();
-                showToast('Şifreler kasası açıldı!');
-            } else {
-                showToast('Hatalı PIN kodu!');
-            }
-        }
-
-        function openChangePinModal() {
-            document.getElementById('oldPinInput').value = '';
-            document.getElementById('newPinInput1').value = '';
-            document.getElementById('newPinInput2').value = '';
-            document.getElementById('changePinModal').classList.remove('hidden');
-            document.getElementById('changePinModal').classList.add('flex');
-        }
-
-        function closeChangePinModal() { document.getElementById('changePinModal').classList.add('hidden'); }
-
-        function saveNewPinCode() {
-            const oldP = document.getElementById('oldPinInput').value;
-            const newP1 = document.getElementById('newPinInput1').value;
-            const newP2 = document.getElementById('newPinInput2').value;
-
-            if (oldP !== userPinCode) return showToast('Mevcut PIN hatalı!');
-            if (!newP1 || newP1.length !== 4) return showToast('Yeni PIN 4 haneli olmalı!');
-            if (newP1 !== newP2) return showToast('Yeni şifreler birbirini tutmuyor!');
-
-            userPinCode = newP1;
-            saveStorage();
-            closeChangePinModal();
-            showToast('PIN güncellendi!');
-        }
-
-        function setLoanFilter(f) {
-            loanFilter = f;
-            ['all', 'kredi', 'tna'].forEach(k => {
-                document.getElementById(`lf-${k}`).className = k === f ? "px-2.5 py-1.5 rounded-lg bg-emerald-600 text-slate-950 transition whitespace-nowrap" : "px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition whitespace-nowrap";
-            });
-            renderKredilerTab();
-        }
-
-        function renderKredilerTab() {
-            let list = loans.slice();
-            if (loanFilter === 'kredi') list = list.filter(i => i.type === 'kredi');
-            if (loanFilter === 'tna') list = list.filter(i => i.type === 'tna');
-
-            const container = document.getElementById('loansListContainer');
-            if (list.length === 0) {
-                container.innerHTML = `<div class="bg-card border border-slate-800 rounded-3xl p-6 text-center text-xs text-slate-400">Kayıt bulunamadı.</div>`;
-                return;
-            }
-            container.innerHTML = list.map(item => {
-                let remM = Math.max(0, item.totalMonths - (item.currentMonth || 1) + 1);
-                let earlyPayoff = Math.round(remM * Number(item.amount) * 0.85);
-                return `
-                <div class="bg-card border border-slate-800 rounded-3xl p-3.5 space-y-2.5">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <div class="flex items-center gap-1.5">
-                                <h3 class="text-sm font-black text-white">${item.bank}</h3>
-                                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-lg ${item.type === 'kredi' ? 'bg-purple-500/15 text-purple-300' : 'bg-amber-500/15 text-amber-300'}">${item.type.toUpperCase()}</span>
-                                <span class="text-[10px] font-bold text-slate-400">Faiz: %${item.rate || 4.29}</span>
-                            </div>
-                            <p class="text-[11px] text-slate-400 mt-0.5">${item.note || ''} ${item.deferral > 0 ? '• ⏳ ' + item.deferral + ' Ay Ertelenmiş' : ''}</p>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-[10px] text-slate-400 block">Taksit</span>
-                            <span class="text-sm font-black text-white">${formatTL(item.amount)}</span>
-                        </div>
-                    </div>
-                    <div class="bg-amoled/70 rounded-xl p-2 flex justify-between text-xs border border-slate-900">
-                        <span class="text-slate-400">Erken Kapama Tahmini:</span>
-                        <span class="font-black text-emerald-400">${formatTL(earlyPayoff)}</span>
-                    </div>
-                    <div class="flex items-center justify-between pt-1 border-t border-slate-800">
-                        <span class="text-[10px] text-slate-400">${item.currentMonth || 1}/${item.totalMonths} Ay • ${item.paidThisMonth ? 'Ödendi ✓' : 'Bekliyor'}</span>
-                        <div class="flex gap-1.5">
-                            <button onclick="toggleLoanPaidStatus('${item.id}')" class="bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold">${item.paidThisMonth ? 'Geri Al' : 'Ödendi'}</button>
-                            <button onclick="openLoanModal('${item.id}')" class="w-8 h-8 rounded-xl bg-slate-900 text-slate-300 flex items-center justify-center text-xs"><i class="fa-solid fa-pen"></i></button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            }).join('');
-        }
-
-        function toggleLoanPaidStatus(id) {
-            const item = loans.find(x => x.id === id);
-            if (item) { item.paidThisMonth = !item.paidThisMonth; saveStorage(); renderAll(); showToast('Durum güncellendi.'); }
-        }
-
-        function setBillSubTab(sub) {
-            billSubTab = sub;
-            document.getElementById('subAreaAylik').className = sub === 'aylik' ? 'space-y-3' : 'hidden space-y-3';
-            document.getElementById('subAreaYillik').className = sub === 'yillik' ? 'space-y-3' : 'hidden space-y-3';
-            document.getElementById('btnSubAylik').className = sub === 'aylik' ? 'py-2.5 rounded-xl bg-emerald-600 text-slate-950 transition' : 'py-2.5 rounded-xl text-slate-400 hover:text-white transition';
-            document.getElementById('btnSubYillik').className = sub === 'yillik' ? 'py-2.5 rounded-xl bg-emerald-600 text-slate-950 transition' : 'py-2.5 rounded-xl text-slate-400 hover:text-white transition';
-        }
-
-        function renderBillsTab() {
-            document.getElementById('monthlyBillsList').innerHTML = monthlyBills.map(b => `
-                <div class="bg-amoled border border-slate-900 rounded-2xl p-3 flex items-center justify-between">
-                    <div><h4 class="text-xs font-bold text-white">${b.title}</h4><p class="text-[10px] text-slate-400">Ayın ${b.day} • ${formatTL(b.amount)}</p></div>
-                    <button onclick="openBillModal('aylik', '${b.id}')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-900 text-slate-300">Düzenle</button>
-                </div>
-            `).join('');
-
-            document.getElementById('yearlyTaxesList').innerHTML = yearlyTaxes.map(t => `
-                <div class="bg-amoled border border-slate-900 rounded-2xl p-3 flex items-center justify-between">
-                    <div><h4 class="text-xs font-bold text-white">${t.title}</h4><p class="text-[10px] text-slate-400">Ayın ${t.day} • ${formatTL(t.amount)}</p></div>
-                    <button onclick="openBillModal('yillik', '${t.id}')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-900 text-slate-300">Düzenle</button>
-                </div>
-            `).join('');
-        }
-
-        function setAdvisorLumpSum(val) { document.getElementById('advCashInput').value = val; runSmartAdvisor(); }
-        function runSmartAdvisor() {
-            const salary = parseFloat(document.getElementById('advSalaryInput').value) || 0;
-            let totalExpenses = 0;
-            loans.forEach(i => totalExpenses += Number(i.amount) || 0);
-            monthlyBills.forEach(b => totalExpenses += Number(b.amount) || 0);
-
-            const netBalance = salary - totalExpenses;
-
-            document.getElementById('advisorOutputContainer').innerHTML = `
-                <div class="bg-card border border-slate-800 rounded-3xl p-4 space-y-3 text-xs">
-                    <h3 class="font-black text-indigo-300 uppercase">Aylık Net Bakiye Özeti</h3>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div class="bg-amoled p-2.5 rounded-2xl border border-slate-900">
-                            <span class="text-[10px] text-slate-400">Toplam Giderler</span>
-                            <p class="text-sm font-black text-rose-400 mt-0.5">${formatTL(totalExpenses)}</p>
-                        </div>
-                        <div class="bg-amoled p-2.5 rounded-2xl border border-slate-900">
-                            <span class="text-[10px] text-slate-400">Kalan Net Bakiye</span>
-                            <p class="text-sm font-black text-emerald-400 mt-0.5">${formatTL(netBalance)}</p>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderVaultList() {
-            if (!isPinUnlocked) return;
-            const container = document.getElementById('vaultItemsList');
-            if (vault.length === 0) {
-                container.innerHTML = `<div class="bg-amoled border border-slate-900 rounded-2xl p-4 text-center text-xs text-slate-400">Şifre kasası boş.</div>`;
-                return;
-            }
-            container.innerHTML = vault.map(v => `
-                <div class="bg-amoled border border-slate-900 rounded-2xl p-3 flex items-center justify-between">
-                    <div><h4 class="text-xs font-bold text-white">${v.bank}</h4><p class="text-xs font-mono font-bold text-emerald-400">${showAllPins || visiblePinIds.has(v.id) ? v.pin : '••••••'}</p></div>
-                    <div class="flex gap-1.5">
-                        <button onclick="togglePinVis('${v.id}')" class="w-8 h-8 rounded-xl bg-slate-900 text-slate-300 flex items-center justify-center text-xs"><i class="fa-solid fa-eye"></i></button>
-                        <button onclick="openVaultModal('${v.id}')" class="w-8 h-8 rounded-xl bg-slate-900 text-slate-300 flex items-center justify-center text-xs"><i class="fa-solid fa-pen"></i></button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function togglePinVis(id) { if (visiblePinIds.has(id)) visiblePinIds.delete(id); else visiblePinIds.add(id); renderVaultList(); }
-        function toggleAllPins() { showAllPins = !showAllPins; renderVaultList(); }
-
-        function openVaultModal(id = null) {
-            const modal = document.getElementById('vaultModal');
-            if (id) {
-                const item = vault.find(x => x.id === id);
-                document.getElementById('editVaultId').value = item.id;
-                document.getElementById('vBankInput').value = item.bank;
-                document.getElementById('vPinInput').value = item.pin;
-                document.getElementById('deleteVaultBtn').classList.remove('hidden');
-            } else {
-                document.getElementById('editVaultId').value = '';
-                document.getElementById('vBankInput').value = '';
-                document.getElementById('vPinInput').value = '';
-                document.getElementById('deleteVaultBtn').classList.add('hidden');
-            }
-            modal.classList.remove('hidden'); modal.classList.add('flex');
-        }
-        function closeVaultModal() { document.getElementById('vaultModal').classList.add('hidden'); }
-        function saveVaultFromModal() {
-            const id = document.getElementById('editVaultId').value;
-            const bank = document.getElementById('vBankInput').value.trim();
-            const pin = document.getElementById('vPinInput').value.trim();
-            if (!bank || !pin) return showToast('Doldurun!');
-            if (id) { const item = vault.find(x => x.id === id); item.bank = bank; item.pin = pin; }
-            else { vault.push({ id: 'v_' + Date.now(), bank, pin }); }
-            saveStorage(); closeVaultModal(); renderVaultList(); showToast('Kaydedildi!');
-        }
-        function deleteVaultFromModal() {
-            vault = vault.filter(x => x.id !== document.getElementById('editVaultId').value);
-            saveStorage(); closeVaultModal(); renderVaultList();
-        }
-
-        function resetAllDataCompletely() {
-            if (confirm('Tüm veriler silinecek?')) {
-                loans = []; monthlyBills = []; yearlyTaxes = []; vault = []; userPinCode = '1234';
-                localStorage.clear(); renderAll(); showToast('Sıfırlandı!');
-            }
-        }
-
-        function openLoanModal(id = null) {
-            const modal = document.getElementById('loanModal');
-            document.getElementById('deleteLoanModalBtn').classList.add('hidden');
-            if (id) {
-                const item = loans.find(x => x.id === id);
-                if (item) {
-                    document.getElementById('editLoanId').value = item.id;
-                    document.getElementById('mBank').value = item.bank;
-                    document.getElementById('mNote').value = item.note || '';
-                    document.getElementById('mInitialPrincipal').value = item.initialPrincipal || '';
-                    document.getElementById('mMonthlyAmount').value = item.amount;
-                    document.getElementById('mTotalMonths').value = item.totalMonths;
-                    document.getElementById('mCurrentMonth').value = item.currentMonth;
-                    document.getElementById('mDay').value = item.day;
-                    document.getElementById('mRate').value = item.rate || 4.29;
-                    document.getElementById('mDeferral').value = item.deferral || 0;
-                    setModalType(item.type || 'kredi');
-                    document.getElementById('deleteLoanModalBtn').classList.remove('hidden');
-                }
-            } else {
-                document.getElementById('editLoanId').value = '';
-                document.getElementById('mBank').value = 'Enpara';
-                document.getElementById('mNote').value = '';
-                document.getElementById('mInitialPrincipal').value = '';
-                document.getElementById('mMonthlyAmount').value = '';
-                document.getElementById('mRate').value = 4.29;
-                document.getElementById('mDeferral').value = 0;
-                setModalType('kredi');
-            }
-            modal.classList.remove('hidden'); modal.classList.add('flex');
-        }
-        function closeLoanModal() { document.getElementById('loanModal').classList.add('hidden'); }
-        
-        function setModalType(t) {
-            modalLoanType = t;
-            document.getElementById('mType-kredi').className = t === 'kredi' ? "py-2 rounded-xl border text-xs font-extrabold flex items-center justify-center gap-1.5 bg-purple-600/20 border-purple-500 text-purple-300" : "py-2 rounded-xl border text-xs font-extrabold flex items-center justify-center gap-1.5 bg-amoled border-slate-900 text-slate-400";
-            document.getElementById('mType-tna').className = t === 'tna' ? "py-2 rounded-xl border text-xs font-extrabold flex items-center justify-center gap-1.5 bg-amber-500/20 border-amber-500 text-amber-300" : "py-2 rounded-xl border text-xs font-extrabold flex items-center justify-center gap-1.5 bg-amoled border-slate-900 text-slate-400";
-            if (t === 'tna') {
-                document.getElementById('mTotalMonths').value = 3;
-            }
-        }
-
-        function saveLoanFromModal() {
-            const id = document.getElementById('editLoanId').value;
-            const bank = document.getElementById('mBank').value;
-            const amount = parseFloat(document.getElementById('mMonthlyAmount').value) || 0;
-            if (!bank || amount <= 0) return showToast('Eksik bilgi!');
-
-            const loanData = {
-                id: id || ('l_' + Date.now()),
-                bank,
-                type: modalLoanType,
-                note: document.getElementById('mNote').value.trim(),
-                initialPrincipal: parseFloat(document.getElementById('mInitialPrincipal').value) || 0,
-                amount,
-                totalMonths: parseInt(document.getElementById('mTotalMonths').value) || 12,
-                currentMonth: parseInt(document.getElementById('mCurrentMonth').value) || 1,
-                day: parseInt(document.getElementById('mDay').value) || 15,
-                rate: parseFloat(document.getElementById('mRate').value) || 4.29,
-                deferral: parseInt(document.getElementById('mDeferral').value) || 0,
-                paidThisMonth: false
-            };
-
-            if (id) {
-                const idx = loans.findIndex(x => x.id === id);
-                if (idx !== -1) loans[idx] = loanData;
-            } else {
-                loans.unshift(loanData);
-            }
-            saveStorage(); closeLoanModal(); renderAll(); showToast('Kayıt kaydedildi!');
-        }
-
-        function deleteLoanFromModal() {
-            loans = loans.filter(x => x.id !== document.getElementById('editLoanId').value);
-            saveStorage(); closeLoanModal(); renderAll();
-        }
-
-        function openBillModal(cat, id = null) {
-            document.getElementById('editBillCat').value = cat;
-            if (id) {
-                const item = (cat === 'aylik' ? monthlyBills : yearlyTaxes).find(x => x.id === id);
-                if (item) {
-                    document.getElementById('bTitle').value = item.title;
-                    document.getElementById('bAmount').value = item.amount || '';
-                    document.getElementById('bDay').value = item.day;
-                }
-            } else {
-                document.getElementById('bTitle').value = '';
-                document.getElementById('bAmount').value = '';
-                document.getElementById('bDay').value = 10;
-            }
-            document.getElementById('billModal').classList.remove('hidden');
-            document.getElementById('billModal').classList.add('flex');
-        }
-        function closeBillModal() { document.getElementById('billModal').classList.add('hidden'); }
-        function saveBillFromModal() {
-            const cat = document.getElementById('editBillCat').value;
-            const title = document.getElementById('bTitle').value.trim();
-            const amount = parseFloat(document.getElementById('bAmount').value) || 0;
-            const day = parseInt(document.getElementById('bDay').value) || 10;
-            if (!title) return showToast('Başlık girmelisiniz!');
-
-            let list = cat === 'aylik' ? monthlyBills : yearlyTaxes;
-            list.push({ id: 'b_' + Date.now(), title, amount, day, paidThisMonth: false });
-
-            saveStorage(); closeBillModal(); renderAll(); showToast('Gider eklendi!');
-        }
-
         let toastTimer = null;
         function showToast(msg) {
-            const box = document.getElementById('toastBox');
+            const b = document.getElementById('toastBox');
             document.getElementById('toastText').textContent = msg;
-            box.classList.remove('hidden');
+            b.classList.remove('hidden');
             if (toastTimer) clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => box.classList.add('hidden'), 2500);
+            toastTimer = setTimeout(() => b.classList.add('hidden'), 2600);
         }
 
         function renderAll() {
-            renderGenelBorcTab();
+            renderGenelTab();
             renderKredilerTab();
-            renderBillsTab();
-            runSmartAdvisor();
+            renderFaturaTab();
+            calculateAdvisorAndBalance();
+            calculateSimpleDeposit();
+            if (state.pinUnlocked) {
+                renderVaultPasswords();
+                renderVaultNotes();
+            }
+            checkDueAlerts();
         }
 
         window.onload = function () {
-            loadStorage();
+            loadAppData();
             renderAll();
         };
     </script>
