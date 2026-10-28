@@ -12,21 +12,29 @@ jobs:
 
     steps:
     - name: Depoyu Klonla
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Node.js Kurulumu
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
-        node-version: 18
+        node-version: 20
 
     - name: Java Kurulumu
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
-        distribution: 'zulu'
+        distribution: 'temurin'
         java-version: 17
 
-    - name: Bağımlılıkları Yükle
-      run: npm install
+    - name: Web Dosyalarını Hazırla (www klasörü)
+      run: |
+        mkdir -p www
+        cp index.html www/
+        cp -r * www/ 2>/dev/null || true
+
+    - name: Bağımlılıkları Kur
+      run: |
+        npm install
+        npm install -g @capacitor/cli
 
     - name: Android Projesini Oluştur
       run: |
