@@ -2267,90 +2267,50 @@
             });
         }
 
-        function sendNativeNotification(title, body) {
-            if (!("Notification" in window) || Notification.permission !== "granted") return;
+        // Service Worker kaydı
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
 
-            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-                navigator.serviceWorker.ready.then(reg => {
-                    reg.showNotification(title, {
-                        body: body,
-                        icon: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png",
-                        badge: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png",
-                        vibrate: [200, 100, 200]
-                    });
-                }).catch(() => {
-                    new Notification(title, {
-                        body: body,
-                        icon: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png"
-                    });
-                });
+function sendNativeNotification(title, body) {
+    if (!("Notification" in window) || Notification.permission !== "granted") return;
+
+    if (navigator.serviceWorker) {
+        navigator.serviceWorker.ready.then(reg => {
+            reg.showNotification(title, {
+                body: body,
+                icon: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png",
+                badge: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png",
+                vibrate: [200, 100, 200]
+            });
+        }).catch(() => {
+            new Notification(title, { body: body, icon: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png" });
+        });
+    } else {
+        new Notification(title, { body: body, icon: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png" });
+    }
+}
+
+function manuelBildirimTesti() {
+    if (!("Notification" in window)) {
+        showToast("Cihazınızda bildirim desteği yok.");
+        return;
+    }
+
+    if (Notification.permission === "granted") {
+        sendNativeNotification("Finans Kasam Pro", "Bildirim sistemi çalışıyor! 🔔");
+        showToast("Test bildirimi tetiklendi!");
+    } else {
+        Notification.requestPermission().then(p => {
+            if (p === "granted") {
+                sendNativeNotification("Finans Kasam Pro", "Bildirim sistemi çalışıyor! 🔔");
+                showToast("İzin verildi ve bildirim tetiklendi!");
             } else {
-                new Notification(title, {
-                    body: body,
-                    icon: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png"
-                });
+                showToast("Bildirim izni reddedildi.");
             }
-        }
-
-        function manuelBildirimTesti() {
-            if (!("Notification" in window)) {
-                showToast("Cihazınızda bildirim desteği bulunamadı.");
-                return;
-            }
-
-            requestPushPermission(granted => {
-                if (granted) {
-                    sendNativeNotification(
-                        "Finans Kasam Pro",
-                        "Bildirim sistemi hazır! Ödeme vadesi ve 15:30 kontrolleri aktif. 🔔"
-                    );
-                    showToast("Bildirim izni onaylandı ve test gönderildi!");
-                    runNativeDueNotifications();
-                } else {
-                    showToast("Bildirim izni verilmedi. Lütfen uygulama ayarlarından açın.");
-                }
-            });
-        }
-
-        function runNativeDueNotifications() {
-            if (!("Notification" in window) || Notification.permission !== "granted") return;
-
-            const now = new Date();
-            const today = now.getDate();
-            const currentHour = now.getHours();
-            const currentMin = now.getMinutes();
-
-            state.loans.forEach(loan => {
-                if (loan.paidThisMonth) return;
-                const dueDay = parseInt(loan.day) || 15;
-
-                // 1 Gün Önce Bildirimi
-                if (dueDay === today + 1) {
-                    const key1Gun = `notif_1gun_${loan.id}_${today}`;
-                    if (!localStorage.getItem(key1Gun)) {
-                        sendNativeNotification(
-                            "⚠️ Yaklaşan Ödeme Hatırlatması",
-                            `Yarın ${loan.bank} (${loan.note || 'Taksit'}) için ${formatTL(loan.amount)} ödemeniz var!`
-                        );
-                        localStorage.setItem(key1Gun, "ok");
-                    }
-                }
-
-                // Ödeme Günü Saat 15:30 Bildirimi
-                if (dueDay === today) {
-                    if (currentHour > 15 || (currentHour === 15 && currentMin >= 30)) {
-                        const keyBugun = `notif_1530_${loan.id}_${today}`;
-                        if (!localStorage.getItem(keyBugun)) {
-                            sendNativeNotification(
-                                "🔔 15:30 Ödeme Kontrolü",
-                                `Bugün ${loan.bank} borcunu (${formatTL(loan.amount)}) ödedin mi? Kontrol etmek için dokun.`
-                            );
-                            localStorage.setItem(keyBugun, "ok");
-                        }
-                    }
-                }
-            });
-        }
+        });
+    }
+}
 
         window.onload = function () {
             loadAppData();
