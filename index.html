@@ -2272,9 +2272,30 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
 
-function sendNativeNotification(title, body) {
-    if (!("Notification" in window) || Notification.permission !== "granted") return;
+// =========================================================================
+// YEREL ANDROID (CAPACITOR) & WEB BİLDİRİM MOTORU
+// =========================================================================
+async function sendNativeNotification(title, body) {
+    // 1. Durum: Capacitor Yerel APK Ortamı (Gerçek Android Sistem Bildirimi)
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
+        try {
+            const { LocalNotifications } = window.Capacitor.Plugins;
+            await LocalNotifications.requestPermissions();
+            await LocalNotifications.schedule({
+                notifications: [{
+                    id: Math.floor(Math.random() * 100000),
+                    title: title,
+                    body: body,
+                    sound: "beep.wav"
+                }]
+            });
+            return;
+        } catch (e) {
+            console.log("Capacitor bildirim hatası:", e);
+        }
+    }
 
+    // 2. Durum: Web / Tarayıcı Yedek Kanalı
     if (navigator.serviceWorker) {
         navigator.serviceWorker.ready.then(reg => {
             reg.showNotification(title, {
@@ -2286,36 +2307,71 @@ function sendNativeNotification(title, body) {
         }).catch(() => {
             new Notification(title, { body: body, icon: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png" });
         });
-    } else {
+    } else if ("Notification" in window && Notification.permission === "granted") {
         new Notification(title, { body: body, icon: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png" });
     }
 }
 
 function manuelBildirimTesti() {
-    if (!("Notification" in window)) {
-        showToast("Cihazınızda bildirim desteği yok.");
-        return;
-    }
-
-    if (Notification.permission === "granted") {
-        sendNativeNotification("Finans Kasam Pro", "Bildirim sistemi çalışıyor! 🔔");
-        showToast("Test bildirimi tetiklendi!");
-    } else {
-        Notification.requestPermission().then(p => {
-            if (p === "granted") {
-                sendNativeNotification("Finans Kasam Pro", "Bildirim sistemi çalışıyor! 🔔");
-                showToast("İzin verildi ve bildirim tetiklendi!");
-            } else {
-                showToast("Bildirim izni reddedildi.");
-            }
-        });
-    }
+    sendNativeNotification("Finans Kasam Pro", "Bildirim motoru sorunsuz çalışıyor! 🔔");
+    showToast("Test bildirimi tetiklendi!");
 }
 
-// 1 GÜN ÖNCE VE ÖDEME GÜNÜ SAAT 15:30 BİLDİRİM MOTORU
-function runNativeDueNotifications() {
-    if (!("Notification" in window) || Notification.permission !== "granted") return;
+// =========================================================================
+// 1 GÜN ÖNCE VE ÖDEME GÜNÜ SAAT 15:30 BİLDİRİM VE ALARM MOTORU
+// =========================================================================
+async function planlaVeCalistirBildirimler() {
+    // A) Capacitor Yerel Alarm Planlaması (Uygulama tamamen kapalı olsa bile Android alarmı çalar)
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
+        try {
+            const { LocalNotifications } = window.Capacitor.Plugins;
+            await LocalNotifications.requestPermissions();
+            
+            const pending = await LocalNotifications.getPending();
+            if (pending.notifications.length > 0) {
+                await LocalNotifications.cancel(pending);
+            }
 
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+
+            state.loans.forEach((loan, idx) => {
+                if (loan.paidThisMonth) return;
+                const dueDay = parseInt(loan.day) || 15;
+
+                // 1 Gün Önce Bildirimi (Saat 10:00'a kurulur)
+                const oneDayBefore = new Date(year, month, dueDay - 1, 10, 0, 0);
+                if (oneDayBefore > now) {
+                    LocalNotifications.schedule({
+                        notifications: [{
+                            id: 1000 + idx,
+                            title: "⚠️ Yaklaşan Ödeme Hatırlatması",
+                            body: `Yarın ${loan.bank} (${loan.note || 'Taksit'}) için ${formatTL(loan.amount)} ödemeniz var!`,
+                            schedule: { at: oneDayBefore }
+                        }]
+                    });
+                }
+
+                // Vade Günü Saat 15:30 Alarm Bildirimi
+                const dueDay1530 = new Date(year, month, dueDay, 15, 30, 0);
+                if (dueDay1530 > now) {
+                    LocalNotifications.schedule({
+                        notifications: [{
+                            id: 2000 + idx,
+                            title: "🔔 15:30 Ödeme Kontrolü",
+                            body: `Bugün ${loan.bank} borcunu (${formatTL(loan.amount)}) ödedin mi?`,
+                            schedule: { at: dueDay1530 }
+                        }]
+                    });
+                }
+            });
+        } catch (err) {
+            console.error("Yerel planlama hatası:", err);
+        }
+    }
+
+    // B) Canlı Çalışma Kontrolü (Açıkken veya arka plandayken anlık kontrol)
     const now = new Date();
     const today = now.getDate();
     const currentHour = now.getHours();
@@ -2325,7 +2381,7 @@ function runNativeDueNotifications() {
         if (loan.paidThisMonth) return;
         const dueDay = parseInt(loan.day) || 15;
 
-        // 1. Durum: 1 Gün Önce Bildirimi
+        // 1 Gün Önce
         if (dueDay === today + 1) {
             const key1Gun = `notif_1gun_${loan.id}_${today}`;
             if (!localStorage.getItem(key1Gun)) {
@@ -2337,7 +2393,7 @@ function runNativeDueNotifications() {
             }
         }
 
-        // 2. Durum: Ödeme Günü Saat 15:30 Bildirimi
+        // Ödeme Günü Saat 15:30
         if (dueDay === today) {
             if (currentHour > 15 || (currentHour === 15 && currentMin >= 30)) {
                 const keyBugun = `notif_1530_${loan.id}_${today}`;
@@ -2356,8 +2412,8 @@ function runNativeDueNotifications() {
 window.onload = function () {
     loadAppData();
     renderAll();
-    runNativeDueNotifications();
-    setInterval(runNativeDueNotifications, 5 * 60 * 1000);
+    planlaVeCalistirBildirimler();
+    setInterval(planlaVeCalistirBildirimler, 5 * 60 * 1000);
 };
 </script>
 </body>
