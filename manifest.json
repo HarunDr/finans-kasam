@@ -1,16 +1,17 @@
 {
-  "background_color": "#2e2d2d",
-  "dir": "ltr",
-  "display": "standalone",
   "name": "Finans Kasam",
-  "orientation": "any",
-  "scope": "/",
-  "short_name": "Kasam",
-  "start_url": "/",
-  "theme_color": "#373636",
+  "short_name": "Finans",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#070b14",
+  "theme_color": "#070b14",
   "description": "Kişisel finans ve bütçe takip uygulaması",
-  "lang": "tr",
-  "categories": [
-    "finance"
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }
