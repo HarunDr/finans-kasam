@@ -1,0 +1,16 @@
+{
+  "background_color": "#2e2d2d",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Finans Kasam",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "Kasam",
+  "start_url": "/",
+  "theme_color": "#373636",
+  "description": "Kişisel finans ve bütçe takip uygulaması",
+  "lang": "tr",
+  "categories": [
+    "finance"
+  ]
+}
