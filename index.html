@@ -2038,8 +2038,8 @@
                 document.getElementById('mTotalMonths').value = item.totalMonths;
                 document.getElementById('mCurrentMonth').value = item.currentMonth;
                 document.getElementById('mDay').value = item.day;
-                document.getElementById('mRate').value = item.rate;
                 setModalType(item.type || 'kredi');
+                document.getElementById('mRate').value = item.rate;
                 setDeferralPreset(item.deferralMonths || 0);
                 delBtn.classList.remove('hidden');
             } else {
