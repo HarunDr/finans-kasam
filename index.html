@@ -2268,62 +2268,30 @@
         }
 
         function sendNativeNotification(title, body) {
-            // SERVICE WORKER KAYDI (Android sistem bildirimleri için şarttır)
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/finans-kasam/sw.js').catch(err => {
-        console.log('SW hatası:', err);
-    });
-}
+            if (!("Notification" in window) || Notification.permission !== "granted") return;
 
-function sendNativeNotification(title, body) {
-    if (!("Notification" in window) || Notification.permission !== "granted") return;
-
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.ready.then(reg => {
-            reg.showNotification(title, {
-                body: body,
-                icon: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png",
-                badge: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png",
-                vibrate: [200, 100, 200],
-                tag: 'finans-alert'
-            });
-        });
-    } else {
-        new Notification(title, {
-            body: body,
-            icon: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png"
-        });
-    }
-}
-
-function manuelBildirimTesti() {
-    if (!("Notification" in window)) {
-        showToast("Cihazınızda bildirim desteği bulunamadı.");
-        return;
-    }
-
-    if (Notification.permission === "granted") {
-        sendNativeNotification(
-            "Finans Kasam Pro",
-            "Bildirim sistemi hazır! Ödeme vadesi ve 15:30 kontrolleri aktif. 🔔"
-        );
-        showToast("Test bildirimi gönderildi!");
-        runNativeDueNotifications();
-    } else {
-        Notification.requestPermission().then(permission => {
-            if (permission === "granted") {
-                sendNativeNotification(
-                    "Finans Kasam Pro",
-                    "Bildirim sistemi hazır! 🔔"
-                );
-                showToast("İzin onaylandı, test bildirimi gönderildi!");
-                runNativeDueNotifications();
+            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.ready.then(reg => {
+                    reg.showNotification(title, {
+                        body: body,
+                        icon: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png",
+                        badge: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png",
+                        vibrate: [200, 100, 200]
+                    });
+                }).catch(() => {
+                    new Notification(title, {
+                        body: body,
+                        icon: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png"
+                    });
+                });
             } else {
-                showToast("Lütfen bildirim iznini verin.");
+                new Notification(title, {
+                    body: body,
+                    icon: "https://cdn-icons-png.flaticon.com/512/5501/5501375.png"
+                });
             }
-        });
-    }
-}
+        }
+
         function manuelBildirimTesti() {
             if (!("Notification" in window)) {
                 showToast("Cihazınızda bildirim desteği bulunamadı.");
