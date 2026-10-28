@@ -382,6 +382,14 @@
                         </label>
                     </div>
 
+                    <!-- METİN İLE YEDEK YÜKLEME ALANI -->
+                    <div class="pt-2 border-t border-slate-800/80 space-y-2">
+                        <textarea id="rawJsonInput" rows="3" class="w-full bg-slate-900/90 text-slate-200 border border-slate-700/70 rounded-xl p-2.5 text-xs font-mono focus:outline-none focus:border-emerald-500" placeholder="Yedek JSON metnini buraya yapıştır..."></textarea>
+                        <button type="button" onclick="metindenYedekYukle()" class="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 active:scale-95 transition">
+                            <i class="fa-solid fa-file-import"></i> Metinden İçe Aktar
+                        </button>
+                    </div>
+
                     <button onclick="resetAllAppData()" class="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 py-2.5 rounded-xl text-xs font-black active:scale-95 transition">
                         <i class="fa-solid fa-trash-can mr-1"></i> Tüm Verileri Sıfırla (Tertemiz Yap)
                     </button>
@@ -390,7 +398,7 @@
         </section>
 
     </main>
-
+               
     <!-- ALT MENÜ (5 BAĞIMSIZ SEKME) -->
     <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-amoled/95 backdrop-blur-xl border-t border-slate-800/90 px-1 py-1.5 z-30">
         <div class="grid grid-cols-5 gap-1">
@@ -2456,6 +2464,29 @@ function triggerBackupImport() {
     input.value = '';
     input.click();
 }
+function metindenYedekYukle() {
+    const rawText = document.getElementById('rawJsonInput').value.trim();
+    if (!rawText) {
+        alert("Lütfen JSON metnini kutuya yapıştırın!");
+        return;
+    }
+    try {
+        const rawData = JSON.parse(rawText);
+        let finalData = Array.isArray(rawData) ? { loans: rawData, bills: [], taxes: [], passwords: [], notes: [] } : rawData;
+
+        state = finalData;
+        localStorage.setItem('finansKasamData', JSON.stringify(finalData));
+
+        if (typeof planlaVeCalistirBildirimler === "function") {
+            planlaVeCalistirBildirimler();
+        }
+
+        alert("Yedek başarıyla yüklendi!");
+        location.reload();
+    } catch (err) {
+        alert("Geçersiz JSON formatı: " + err.message);
+    }
+}        
 </script>
 </body>
 </html>
