@@ -1,15 +1,21 @@
 {
   "name": "Finans Kasam",
   "short_name": "Finans",
-  "start_url": "./index.html",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#070b14",
   "theme_color": "#070b14",
   "description": "Kişisel finans ve bütçe takip uygulaması",
   "icons": [
     {
-      "src": "icon.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/5501/5501375.png",
       "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/5501/5501375.png",
+      "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     }
