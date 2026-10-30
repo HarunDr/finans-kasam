@@ -35,10 +35,11 @@ jobs:
       run: |
         npm install
         npm install -g @capacitor/cli
+        npm install @capacitor/local-notifications
 
     - name: Android Projesini Oluştur
       run: |
-        npx cap add android
+        npx cap add android || true
         npx cap sync android
 
     - name: APK Derle (Gradle)
