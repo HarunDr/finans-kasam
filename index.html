@@ -2488,5 +2488,15 @@ function metindenYedekYukle() {
     }
 }        
 </script>
+<script src="bildirim.js"></script>
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+            if (typeof planlaYerelBildirimler === 'function') {
+                planlaYerelBildirimler();
+            }
+        }, 1500);
+    });
+</script>
 </body>
 </html>
